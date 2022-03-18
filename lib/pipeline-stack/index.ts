@@ -7,8 +7,8 @@ import * as ssp from '@aws-quickstart/ssp-amazon-eks';
 import { GlobalResources, MngClusterProvider } from '@aws-quickstart/ssp-amazon-eks';
 import { valueFromContext } from '@aws-quickstart/ssp-amazon-eks/dist/utils/context-utils';
 import { getSecretValue } from '@aws-quickstart/ssp-amazon-eks/dist/utils/secrets-manager-utils';
-// Team implementations
-// Team implementations
+import { KubecostAddOn } from '@kubecost/kubecost-ssp-addon';
+
 import * as team from '../teams';
 const burnhamManifestDir = './lib/teams/team-burnham/'
 const rikerManifestDir = './lib/teams/team-riker/'
@@ -178,6 +178,7 @@ export default class PipelineConstruct {
         new ssp.addons.ExternalDnsAddon({
           hostedZoneResources: [GlobalResources.HostedZone], // you can add more if you register resource providers
         }),
+        new KubecostAddOn(),
         new ssp.CalicoAddOn(),
         new ssp.MetricsServerAddOn(),
         new ssp.ClusterAutoScalerAddOn(),

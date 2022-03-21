@@ -4,12 +4,20 @@ import * as cdk from '@aws-cdk/core';
 import { StackProps } from '@aws-cdk/core';
 // SSP Lib
 import * as ssp from '@aws-quickstart/ssp-amazon-eks';
-import { GlobalResources, MngClusterProvider } from '@aws-quickstart/ssp-amazon-eks';
+import {
+  ApplicationRepository,
+  ArgoCDAddOnProps,
+  GlobalResources,
+  MngClusterProvider,
+  NginxAddOnProps,
+} from '@aws-quickstart/ssp-amazon-eks';
 import { valueFromContext } from '@aws-quickstart/ssp-amazon-eks/dist/utils/context-utils';
 import { getSecretValue } from '@aws-quickstart/ssp-amazon-eks/dist/utils/secrets-manager-utils';
 import { KubecostAddOn } from '@kubecost/kubecost-ssp-addon';
 
 import * as team from '../teams';
+import * as c from './const';
+
 const burnhamManifestDir = './lib/teams/team-burnham/';
 const rikerManifestDir = './lib/teams/team-riker/';
 
@@ -19,9 +27,9 @@ const SECRET_ARGO_ADMIN_PWD = 'argo-admin-secret';
 export default class PipelineConstruct {
   async buildAsync(scope: cdk.Construct, id: string, props?: StackProps) {
     try {
-      await getSecretValue('github-token', 'us-east-2');
-      await getSecretValue('github-token', 'eu-west-1');
-      await getSecretValue('github-token', 'eu-west-3');
+      await getSecretValue('github-ssp', 'us-east-2');
+      await getSecretValue('github-ssp', 'eu-west-1');
+      await getSecretValue('github-ssp', 'eu-west-3');
 
       await getSecretValue('argo-admin-secret', 'us-east-2');
       await getSecretValue('argo-admin-secret', 'eu-west-1');
@@ -95,8 +103,6 @@ export default class PipelineConstruct {
       .addOns(
         //new wego.WeaveGitOpsAddOn(bootstrapRepository, 'wego-system'),
         new ssp.AwsLoadBalancerControllerAddOn(),
-        //new ssp.NginxAddOn,
-        // new ssp.ArgoCDAddOn,
         new ssp.AppMeshAddOn({
           enableTracing: true,
         }),
@@ -106,7 +112,7 @@ export default class PipelineConstruct {
           hostedZoneResources: [GlobalResources.HostedZone], // you can add more if you register resource providers
         }),
         new KubecostAddOn({
-          kubecostToken: 'c2FsbGFtYW5AYW1hem9uLmZyxm343yadf98',
+          kubecostToken: c.KUBECOST_TOKEN,
         }),
         new ssp.CalicoAddOn(),
         new ssp.MetricsServerAddOn(),
@@ -115,6 +121,41 @@ export default class PipelineConstruct {
         new ssp.XrayAddOn(),
         new ssp.SecretsStoreAddOn(),
       );
+
+    const argoCDAddOnProps: ArgoCDAddOnProps = {
+      namespace: 'argocd',
+      bootstrapRepo: {
+        repoUrl: gitUrl,
+        targetRevision: 'main',
+        credentialsSecretName: 'github-ssp',
+        credentialsType: 'TOKEN',
+      },
+      adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
+    };
+    const devArgoCDAddOnProps = argoCDAddOnProps;
+    devArgoCDAddOnProps.bootstrapRepo!.path = 'envs/dev';
+    const testArgoCDAddOnProps = argoCDAddOnProps;
+    testArgoCDAddOnProps.bootstrapRepo!.path = 'envs/test';
+    const prodArgoCDAddOnProps = argoCDAddOnProps;
+    prodArgoCDAddOnProps.bootstrapRepo!.path = 'envs/prod';
+    console.log(devArgoCDAddOnProps.bootstrapRepo!.path);
+
+    const nginxAddOnProps: NginxAddOnProps = {
+      internetFacing: true,
+      backendProtocol: 'tcp',
+      // externalDnsHostname: devSubdomain,
+      crossZoneEnabled: false,
+      // certificateResourceName: GlobalResources.Certificate,
+      values: {
+        controller: {
+          service: {
+            httpsPort: {
+              targetPort: 'http',
+            },
+          },
+        },
+      },
+    };
 
     ssp.CodePipelineStack.builder()
       .name('ssp-eks-pipeline')
@@ -133,21 +174,14 @@ export default class PipelineConstruct {
             new ssp.CreateCertificateProvider('wildcard-cert', `*.${devSubdomain}`, GlobalResources.HostedZone),
           )
           .addOns(
-            new ssp.ArgoCDAddOn({
-              bootstrapRepo: {
-                repoUrl: gitUrl,
-                targetRevision: 'main',
-                path: 'envs/dev',
-              },
-              adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
-              namespace: 'argocd',
-            }),
+            new ssp.ArgoCDAddOn(devArgoCDAddOnProps),
             new ssp.NginxAddOn({
+              // ...nginxAddOnProps,
               internetFacing: true,
               backendProtocol: 'tcp',
-              externalDnsHostname: devSubdomain,
+              // externalDnsHostname: devSubdomain,
               crossZoneEnabled: false,
-              certificateResourceName: GlobalResources.Certificate,
+              // certificateResourceName: GlobalResources.Certificate,
               values: {
                 controller: {
                   service: {
@@ -157,6 +191,8 @@ export default class PipelineConstruct {
                   },
                 },
               },
+              externalDnsHostname: devSubdomain,
+              certificateResourceName: GlobalResources.Certificate,
             }),
           ),
       })
@@ -170,30 +206,11 @@ export default class PipelineConstruct {
             new ssp.CreateCertificateProvider('wildcard-cert', `*.${testSubdomain}`, GlobalResources.HostedZone),
           )
           .addOns(
-            new ssp.ArgoCDAddOn({
-              bootstrapRepo: {
-                repoUrl: gitUrl,
-                targetRevision: 'main',
-                path: 'envs/test',
-              },
-              adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
-              namespace: 'argocd',
-            }),
+            new ssp.ArgoCDAddOn(testArgoCDAddOnProps),
             new ssp.NginxAddOn({
-              internetFacing: true,
-              backendProtocol: 'tcp',
+              ...nginxAddOnProps,
               externalDnsHostname: testSubdomain,
-              crossZoneEnabled: false,
               certificateResourceName: GlobalResources.Certificate,
-              values: {
-                controller: {
-                  service: {
-                    httpsPort: {
-                      targetPort: 'http',
-                    },
-                  },
-                },
-              },
             }),
           ),
         stageProps: {
@@ -210,21 +227,9 @@ export default class PipelineConstruct {
             new ssp.CreateCertificateProvider('wildcard-cert', `*.${prodSubdomain}`, GlobalResources.HostedZone),
           )
           .addOns(
-            new ssp.ArgoCDAddOn({
-              bootstrapRepo: {
-                repoUrl: gitUrl,
-                targetRevision: 'main',
-                path: 'envs/prod',
-              },
-              adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
-              namespace: 'argocd',
-            }),
+            new ssp.ArgoCDAddOn(prodArgoCDAddOnProps),
             new ssp.NginxAddOn({
-              internetFacing: true,
-              backendProtocol: 'tcp',
-              externalDnsHostname: prodSubdomain,
-              crossZoneEnabled: false,
-              certificateResourceName: GlobalResources.Certificate,
+              ...nginxAddOnProps,
               values: {
                 controller: {
                   service: {
@@ -234,6 +239,8 @@ export default class PipelineConstruct {
                   },
                 },
               },
+              externalDnsHostname: prodSubdomain,
+              certificateResourceName: GlobalResources.Certificate,
             }),
           ),
         stageProps: {

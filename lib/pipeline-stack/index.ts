@@ -14,6 +14,7 @@ import {
 import { valueFromContext } from '@aws-quickstart/ssp-amazon-eks/dist/utils/context-utils';
 import { getSecretValue } from '@aws-quickstart/ssp-amazon-eks/dist/utils/secrets-manager-utils';
 import { KubecostAddOn } from '@kubecost/kubecost-ssp-addon';
+import { KubeOpsViewAddOn } from '../apps/kube-ops-view';
 
 import * as team from '../teams';
 import * as c from './const';
@@ -116,10 +117,12 @@ export default class PipelineConstruct {
         }),
         new ssp.CalicoAddOn(),
         new ssp.MetricsServerAddOn(),
-        new ssp.ClusterAutoScalerAddOn(),
+        //new ssp.ClusterAutoScalerAddOn(),
+        new ssp.addons.KarpenterAddOn(),
         new ssp.ContainerInsightsAddOn(),
         new ssp.XrayAddOn(),
         new ssp.SecretsStoreAddOn(),
+        new KubeOpsViewAddOn(),
       );
 
     const argoCDAddOnProps: ArgoCDAddOnProps = {

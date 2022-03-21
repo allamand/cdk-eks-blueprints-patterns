@@ -10,9 +10,13 @@ export default class KubecostConstruct extends cdk.Construct {
         const stackId = `${id}-blueprint`;
 
         EksBlueprint.builder()
-            .account(process.env.CDK_DEFAULT_ACCOUNT!)
-            .region(process.env.CDK_DEFAULT_REGION)
-            .addOns(new KubecostAddOn())
-            .build(scope, stackId);
+          .account(process.env.CDK_DEFAULT_ACCOUNT!)
+          .region(process.env.CDK_DEFAULT_REGION)
+          .addOns(
+            new KubecostAddOn({
+              kubecostToken: "c2FsbGFtYW5AYW1hem9uLmZyxm343yadf98",
+            }),
+          )
+          .build(scope, stackId);
     }
 }

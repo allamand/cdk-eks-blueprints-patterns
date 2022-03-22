@@ -27,7 +27,7 @@ export class KubeOpsViewAddOn extends ssp.addons.HelmAddOn {
   // Customers will have to explicitly add this add-on to the blueprint.
   @ssp.utils.dependable(ssp.SecretsStoreAddOn.name)
   deploy(clusterInfo: ssp.ClusterInfo): Promise<Construct> {
-    const ns = ssp.utils.createNamespace(this.props.namespace, clusterInfo.cluster, true);
+    const ns = ssp.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
 
     // const serviceAccountName = 'aws-for-fluent-bit-sa';
     // const sa = clusterInfo.cluster.addServiceAccount('my-aws-for-fluent-bit-sa', {

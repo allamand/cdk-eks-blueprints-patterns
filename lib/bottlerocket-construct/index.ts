@@ -30,9 +30,10 @@ export default class BottlerocketConstruct extends cdk.Construct {
 
         const stackID = `${id}-blueprint`;
         const clusterProvider = new ssp.AsgClusterProvider({
-            version: eks.KubernetesVersion.V1_20,
-            machineImageType:  eks.MachineImageType.BOTTLEROCKET
-         });
+          id: stackID,
+          version: eks.KubernetesVersion.V1_20,
+          machineImageType: eks.MachineImageType.BOTTLEROCKET,
+        });
         new ssp.EksBlueprint(scope, { id: stackID, teams, addOns, clusterProvider }, {
             env: {
                 region: 'us-east-1'

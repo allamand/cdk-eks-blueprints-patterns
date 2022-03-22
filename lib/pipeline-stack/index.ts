@@ -185,15 +185,15 @@ export default class PipelineConstruct {
               // externalDnsHostname: devSubdomain,
               crossZoneEnabled: false,
               // certificateResourceName: GlobalResources.Certificate,
-              values: {
-                controller: {
-                  service: {
-                    httpsPort: {
-                      targetPort: 'http',
-                    },
-                  },
-                },
-              },
+              // values: {
+              //   controller: {
+              //     service: {
+              //       httpsPort: {
+              //         targetPort: 'http',
+              //       },
+              //     },
+              //   },
+              // },
               externalDnsHostname: devSubdomain,
               certificateResourceName: GlobalResources.Certificate,
             }),

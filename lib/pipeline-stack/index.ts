@@ -135,23 +135,17 @@ export default class PipelineConstruct {
       ...bootstrapRepo,
       path: 'envs/dev',
     };
+    const testbootstrapRepo: ApplicationRepository = {
+      ...bootstrapRepo,
+      path: 'envs/test',
+    };
+    const prodbootstrapRepo: ApplicationRepository = {
+      ...bootstrapRepo,
+      path: 'envs/prod',
+    };
     const argoCDAddOnProps: ArgoCDAddOnProps = {
       namespace: 'argocd',
       adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
-    };
-    const devArgoCDAddOnProps = {
-      ...argoCDAddOnProps,
-      ...{ ...bootstrapRepo, ...{ path: 'envs/dev' } },
-    };
-
-    const testArgoCDAddOnProps = {
-      ...argoCDAddOnProps,
-      ...{ ...bootstrapRepo, ...{ path: 'envs/test' } },
-    };
-
-    const prodArgoCDAddOnProps = {
-      ...argoCDAddOnProps,
-      ...{ ...bootstrapRepo, ...{ path: 'envs/prod' } },
     };
 
     const nginxAddOnProps: NginxAddOnProps = {
@@ -160,15 +154,15 @@ export default class PipelineConstruct {
       // externalDnsHostname: devSubdomain,
       crossZoneEnabled: false,
       // certificateResourceName: GlobalResources.Certificate,
-      values: {
-        controller: {
-          service: {
-            httpsPort: {
-              targetPort: 'http',
-            },
-          },
-        },
-      },
+      // values: {
+      //   controller: {
+      //     service: {
+      //       httpsPort: {
+      //         targetPort: 'http',
+      //       },
+      //     },
+      //   },
+      // },
     };
 
     ssp.CodePipelineStack.builder()
@@ -190,18 +184,8 @@ export default class PipelineConstruct {
           .addOns(
             new ssp.ArgoCDAddOn({
               ...argoCDAddOnProps,
-              ...{bootstrapRepo: devbootstrapRepo}}),
-              //...devbootstrapRepo,
-              // namespace: 'argocd',
-              // adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
-              // bootstrapRepo:{
-              //   repoUrl: gitUrl,
-              //   targetRevision: 'main',
-              //   path: 'envs/dev',
-              //   credentialsSecretName: 'github-ssp',
-              //   credentialsType: 'TOKEN',
-              // },
-            //}),
+              ...{ bootstrapRepo: devbootstrapRepo },
+            }),
             new ssp.NginxAddOn({
               // ...nginxAddOnProps,
               internetFacing: true,
@@ -231,7 +215,10 @@ export default class PipelineConstruct {
             new ssp.CreateCertificateProvider('wildcard-cert', `*.${testSubdomain}`, GlobalResources.HostedZone),
           )
           .addOns(
-            new ssp.ArgoCDAddOn(testArgoCDAddOnProps),
+            new ssp.ArgoCDAddOn({
+              ...argoCDAddOnProps,
+              ...{ bootstrapRepo: testbootstrapRepo },
+            }),
             new ssp.NginxAddOn({
               ...nginxAddOnProps,
               externalDnsHostname: testSubdomain,
@@ -252,7 +239,10 @@ export default class PipelineConstruct {
             new ssp.CreateCertificateProvider('wildcard-cert', `*.${prodSubdomain}`, GlobalResources.HostedZone),
           )
           .addOns(
-            new ssp.ArgoCDAddOn(prodArgoCDAddOnProps),
+            new ssp.ArgoCDAddOn({
+              ...argoCDAddOnProps,
+              ...{ bootstrapRepo: prodbootstrapRepo },
+            }),
             new ssp.NginxAddOn({
               ...nginxAddOnProps,
               values: {

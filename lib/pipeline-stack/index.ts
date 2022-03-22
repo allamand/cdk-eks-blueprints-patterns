@@ -177,7 +177,7 @@ export default class PipelineConstruct {
             new ssp.CreateCertificateProvider('wildcard-cert', `*.${devSubdomain}`, GlobalResources.HostedZone),
           )
           .addOns(
-            new ssp.ArgoCDAddOn(devArgoCDAddOnProps),
+            //new ssp.ArgoCDAddOn(devArgoCDAddOnProps),
             new ssp.NginxAddOn({
               // ...nginxAddOnProps,
               internetFacing: true,

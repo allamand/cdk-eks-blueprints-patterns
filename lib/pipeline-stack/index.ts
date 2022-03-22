@@ -119,29 +119,36 @@ export default class PipelineConstruct {
         new ssp.MetricsServerAddOn(),
         //new ssp.ClusterAutoScalerAddOn(),
         new ssp.addons.KarpenterAddOn(),
-        //new ssp.ContainerInsightsAddOn(),
+        new ssp.ContainerInsightsAddOn(),
         new ssp.XrayAddOn(),
         new ssp.SecretsStoreAddOn(),
         new KubeOpsViewAddOn(),
       );
 
+    const bootstrapRepo = {
+      repoUrl: gitUrl,
+      targetRevision: 'main',
+      credentialsSecretName: 'github-ssp',
+      credentialsType: 'TOKEN',
+    };
     const argoCDAddOnProps: ArgoCDAddOnProps = {
       namespace: 'argocd',
-      bootstrapRepo: {
-        repoUrl: gitUrl,
-        targetRevision: 'main',
-        credentialsSecretName: 'github-ssp',
-        credentialsType: 'TOKEN',
-      },
       adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
     };
-    const devArgoCDAddOnProps = argoCDAddOnProps;
-    devArgoCDAddOnProps.bootstrapRepo!.path = 'envs/dev';
-    const testArgoCDAddOnProps = argoCDAddOnProps;
-    testArgoCDAddOnProps.bootstrapRepo!.path = 'envs/test';
-    const prodArgoCDAddOnProps = argoCDAddOnProps;
-    prodArgoCDAddOnProps.bootstrapRepo!.path = 'envs/prod';
-    console.log(devArgoCDAddOnProps.bootstrapRepo!.path);
+    const devArgoCDAddOnProps = {
+      ...argoCDAddOnProps,
+      ...{ ...bootstrapRepo, ...{ path: 'envs/dev' } },
+    };
+
+    const testArgoCDAddOnProps = {
+      ...argoCDAddOnProps,
+      ...{ ...bootstrapRepo, ...{ path: 'envs/test' } },
+    };
+
+    const prodArgoCDAddOnProps = {
+      ...argoCDAddOnProps,
+      ...{ ...bootstrapRepo, ...{ path: 'envs/prod' } },
+    };
 
     const nginxAddOnProps: NginxAddOnProps = {
       internetFacing: true,
@@ -177,7 +184,7 @@ export default class PipelineConstruct {
             new ssp.CreateCertificateProvider('wildcard-cert', `*.${devSubdomain}`, GlobalResources.HostedZone),
           )
           .addOns(
-            //new ssp.ArgoCDAddOn(devArgoCDAddOnProps),
+            new ssp.ArgoCDAddOn(devArgoCDAddOnProps),
             new ssp.NginxAddOn({
               // ...nginxAddOnProps,
               internetFacing: true,

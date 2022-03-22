@@ -179,11 +179,11 @@ export default class PipelineConstruct {
           .addOns(
             //new ssp.ArgoCDAddOn(devArgoCDAddOnProps),
             new ssp.NginxAddOn({
-              // ...nginxAddOnProps,
-              internetFacing: true,
-              backendProtocol: 'tcp',
+              //...nginxAddOnProps,
+              //internetFacing: true,
+              //backendProtocol: 'tcp',
               // externalDnsHostname: devSubdomain,
-              crossZoneEnabled: false,
+              //crossZoneEnabled: false,
               // certificateResourceName: GlobalResources.Certificate,
               // values: {
               //   controller: {

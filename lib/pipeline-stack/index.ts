@@ -125,11 +125,15 @@ export default class PipelineConstruct {
         new KubeOpsViewAddOn(),
       );
 
-    const bootstrapRepo = {
+    const bootstrapRepo: ApplicationRepository = {
       repoUrl: gitUrl,
       targetRevision: 'main',
       credentialsSecretName: 'github-ssp',
       credentialsType: 'TOKEN',
+    };
+    const devbootstrapRepo: ApplicationRepository = {
+      ...bootstrapRepo,
+      path: 'envs/dev',
     };
     const argoCDAddOnProps: ArgoCDAddOnProps = {
       namespace: 'argocd',
@@ -184,7 +188,20 @@ export default class PipelineConstruct {
             new ssp.CreateCertificateProvider('wildcard-cert', `*.${devSubdomain}`, GlobalResources.HostedZone),
           )
           .addOns(
-            new ssp.ArgoCDAddOn(devArgoCDAddOnProps),
+            new ssp.ArgoCDAddOn({
+              ...argoCDAddOnProps,
+              ...{bootstrapRepo: devbootstrapRepo}}),
+              //...devbootstrapRepo,
+              // namespace: 'argocd',
+              // adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
+              // bootstrapRepo: {
+              //   repoUrl: gitUrl,
+              //   targetRevision: 'main',
+              //   path: 'envs/dev',
+              //   credentialsSecretName: 'github-ssp',
+              //   credentialsType: 'TOKEN',
+              // },
+            //}),
             new ssp.NginxAddOn({
               // ...nginxAddOnProps,
               internetFacing: true,

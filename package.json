@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@weaveworksoss/weavegitops-ssp-addon": "^0.0.2",
-    "@aws-quickstart/ssp-amazon-eks": "0.12.11",
+    "@aws-quickstart/ssp-amazon-eks": "0.12.13",
     "@keptn/keptn-cp-ssp-addon": "^0.3.0",
     "@kubecost/kubecost-ssp-addon": "^1.0.8",
     "source-map-support": "^0.5.21"

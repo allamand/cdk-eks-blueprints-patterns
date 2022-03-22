@@ -119,7 +119,7 @@ export default class PipelineConstruct {
         new ssp.MetricsServerAddOn(),
         //new ssp.ClusterAutoScalerAddOn(),
         new ssp.addons.KarpenterAddOn(),
-        new ssp.ContainerInsightsAddOn(),
+        //new ssp.ContainerInsightsAddOn(),
         new ssp.XrayAddOn(),
         new ssp.SecretsStoreAddOn(),
         new KubeOpsViewAddOn(),
@@ -179,21 +179,19 @@ export default class PipelineConstruct {
           .addOns(
             //new ssp.ArgoCDAddOn(devArgoCDAddOnProps),
             new ssp.NginxAddOn({
-              //...nginxAddOnProps,
-              //internetFacing: true,
-              //backendProtocol: 'tcp',
-              // externalDnsHostname: devSubdomain,
-              //crossZoneEnabled: false,
-              // certificateResourceName: GlobalResources.Certificate,
-              // values: {
-              //   controller: {
-              //     service: {
-              //       httpsPort: {
-              //         targetPort: 'http',
-              //       },
-              //     },
-              //   },
-              // },
+              // ...nginxAddOnProps,
+              internetFacing: true,
+              backendProtocol: 'tcp',
+              crossZoneEnabled: false,
+              values: {
+                controller: {
+                  service: {
+                    httpsPort: {
+                      targetPort: 'http',
+                    },
+                  },
+                },
+              },
               externalDnsHostname: devSubdomain,
               certificateResourceName: GlobalResources.Certificate,
             }),

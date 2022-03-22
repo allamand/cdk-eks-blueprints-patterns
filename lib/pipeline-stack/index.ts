@@ -194,7 +194,7 @@ export default class PipelineConstruct {
               //...devbootstrapRepo,
               // namespace: 'argocd',
               // adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
-              // bootstrapRepo: {
+              // bootstrapRepo:{
               //   repoUrl: gitUrl,
               //   targetRevision: 'main',
               //   path: 'envs/dev',

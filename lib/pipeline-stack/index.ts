@@ -59,8 +59,8 @@ export default class PipelineConstruct {
     const parentDomain = valueFromContext(scope, 'parent.hostedzone.name', 'eks.demo3.allamand.com');
 
     const provisionerSpecs = {
-      'node.kubernetes.io/instance-type': ['m5.2xlarge'],
-      'topology.kubernetes.io/zone': ['eu-west-1a'],
+      'node.kubernetes.io/instance-type': ['m5.2xlarge', 'm5.large', 'm5.xlarge'],
+      'topology.kubernetes.io/zone': ['eu-west-3a', 'eu-west-3b', 'eu-west-3c'],
       'kubernetes.io/arch': ['amd64', 'arm64'],
       'karpenter.sh/capacity-type': ['spot', 'on-demand'],
     };

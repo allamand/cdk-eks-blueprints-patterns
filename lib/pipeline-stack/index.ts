@@ -126,7 +126,7 @@ export default class PipelineConstruct {
         //new ssp.ClusterAutoScalerAddOn(),
         new ssp.addons.KarpenterAddOn({
           version: 'v0.7.0',
-          ProvisionerSpecs: provisionerSpecs,
+          //ProvisionerSpecs: provisionerSpecs,
         }),
         new ssp.ContainerInsightsAddOn(),
         new ssp.XrayAddOn(),

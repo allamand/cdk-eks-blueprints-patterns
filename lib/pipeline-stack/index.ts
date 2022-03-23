@@ -60,7 +60,7 @@ export default class PipelineConstruct {
 
     const provisionerSpecs = {
       'node.kubernetes.io/instance-type': ['m5.2xlarge'],
-      'topology.kubernetes.io/zone': [],
+      'topology.kubernetes.io/zone': ['eu-west-1a'],
       'kubernetes.io/arch': ['amd64', 'arm64'],
       'karpenter.sh/capacity-type': ['spot', 'on-demand'],
     };
@@ -124,7 +124,10 @@ export default class PipelineConstruct {
         new ssp.CalicoAddOn(),
         new ssp.MetricsServerAddOn(),
         //new ssp.ClusterAutoScalerAddOn(),
-        new ssp.addons.KarpenterAddOn({ ProvisionerSpecs: provisionerSpecs }),
+        new ssp.addons.KarpenterAddOn({
+          version: 'v0.7.0',
+          ProvisionerSpecs: provisionerSpecs,
+        }),
         new ssp.ContainerInsightsAddOn(),
         new ssp.XrayAddOn(),
         new ssp.SecretsStoreAddOn(),

@@ -124,10 +124,10 @@ export default class PipelineConstruct {
         new ssp.CalicoAddOn(),
         new ssp.MetricsServerAddOn(),
         //new ssp.ClusterAutoScalerAddOn(),
-        // new ssp.addons.KarpenterAddOn({
-        //   version: 'v0.7.0',
-        //   ProvisionerSpecs: provisionerSpecs,
-        // }),
+        new ssp.addons.KarpenterAddOn({
+          //version: 'v0.7.0',
+          ProvisionerSpecs: provisionerSpecs,
+        }),
         new ssp.ContainerInsightsAddOn(),
         new ssp.XrayAddOn(),
         new ssp.SecretsStoreAddOn(),

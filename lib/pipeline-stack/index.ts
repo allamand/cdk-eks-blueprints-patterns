@@ -68,13 +68,13 @@ export default class PipelineConstruct {
       .clusterProvider(
         //ATTENTION only the last clusterProvider is applied actually
         new MngClusterProvider({
-          name: 'nodegroup',
+          name: 'nodegroup-od',
           desiredSize: 3,
           maxSize: 20,
           minSize: 1,
           version: KubernetesVersion.V1_20,
-          nodeGroupCapacityType: CapacityType.SPOT,
-          //nodeGroupCapacityType: CapacityType.ON_DEMAND,
+          //nodeGroupCapacityType: CapacityType.SPOT,
+          nodeGroupCapacityType: CapacityType.ON_DEMAND,
           instanceTypes: [
             //new InstanceType('m4.xlarge'),
             new InstanceType('m5.xlarge'),

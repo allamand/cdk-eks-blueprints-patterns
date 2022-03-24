@@ -58,12 +58,12 @@ export default class PipelineConstruct {
     const prodSubdomain: string = valueFromContext(scope, 'prod.subzone.name', 'prod.eks.demo3.allamand.com');
     const parentDomain = valueFromContext(scope, 'parent.hostedzone.name', 'eks.demo3.allamand.com');
 
-    const provisionerSpecs = {
-      'node.kubernetes.io/instance-type': ['m5.2xlarge', 'm5.large', 'm5.xlarge'],
-      'topology.kubernetes.io/zone': ['eu-west-3a', 'eu-west-3b', 'eu-west-3c'],
-      'kubernetes.io/arch': ['amd64', 'arm64'],
-      'karpenter.sh/capacity-type': ['spot', 'on-demand'],
-    };
+    // const provisionerSpecs = {
+    //   'node.kubernetes.io/instance-type': ['m5.2xlarge', 'm5.large', 'm5.xlarge'],
+    //   'topology.kubernetes.io/zone': ['eu-west-3a', 'eu-west-3b', 'eu-west-3c'],
+    //   'kubernetes.io/arch': ['amd64', 'arm64'],
+    //   'karpenter.sh/capacity-type': ['spot', 'on-demand'],
+    // };
 
     const blueprint = ssp.EksBlueprint.builder()
       .account(account) // the supplied default will fail, but build and synth will pass
@@ -126,7 +126,7 @@ export default class PipelineConstruct {
         //new ssp.ClusterAutoScalerAddOn(),
         new ssp.addons.KarpenterAddOn({
           //version: 'v0.7.0',
-          ProvisionerSpecs: provisionerSpecs,
+          // ProvisionerSpecs: provisionerSpecs,
         }),
         new ssp.ContainerInsightsAddOn(),
         new ssp.XrayAddOn(),

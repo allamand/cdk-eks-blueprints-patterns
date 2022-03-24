@@ -5,25 +5,22 @@ import { StackProps } from '@aws-cdk/core';
 // SSP Lib
 import * as ssp from '@aws-quickstart/ssp-amazon-eks';
 import {
-  ApplicationRepository,
-  ArgoCDAddOnProps,
   GlobalResources,
-  MngClusterProvider,
-  NginxAddOnProps,
+  MngClusterProvider
 } from '@aws-quickstart/ssp-amazon-eks';
 import { valueFromContext } from '@aws-quickstart/ssp-amazon-eks/dist/utils/context-utils';
 import { getSecretValue } from '@aws-quickstart/ssp-amazon-eks/dist/utils/secrets-manager-utils';
 import { KubecostAddOn } from '@kubecost/kubecost-ssp-addon';
 import { KubeOpsViewAddOn } from '../apps/kube-ops-view';
-
 import * as team from '../teams';
 import * as c from './const';
+import { argoCDAddOnProps, devbootstrapRepo, nginxAddOnProps, prodbootstrapRepo, testbootstrapRepo } from './const';
+
 
 const burnhamManifestDir = './lib/teams/team-burnham/';
 const rikerManifestDir = './lib/teams/team-riker/';
 
-const gitUrl = 'https://github.com/allamand/ssp-eks-workloads.git';
-const SECRET_ARGO_ADMIN_PWD = 'argo-admin-secret';
+
 
 export default class PipelineConstruct {
   async buildAsync(scope: cdk.Construct, id: string, props?: StackProps) {
@@ -57,13 +54,6 @@ export default class PipelineConstruct {
     const testSubdomain: string = valueFromContext(scope, 'test.subzone.name', 'test.eks.demo3.allamand.com');
     const prodSubdomain: string = valueFromContext(scope, 'prod.subzone.name', 'prod.eks.demo3.allamand.com');
     const parentDomain = valueFromContext(scope, 'parent.hostedzone.name', 'eks.demo3.allamand.com');
-
-    // const provisionerSpecs = {
-    //   'node.kubernetes.io/instance-type': ['m5.2xlarge', 'm5.large', 'm5.xlarge'],
-    //   'topology.kubernetes.io/zone': ['eu-west-3a', 'eu-west-3b', 'eu-west-3c'],
-    //   'kubernetes.io/arch': ['amd64', 'arm64'],
-    //   'karpenter.sh/capacity-type': ['spot', 'on-demand'],
-    // };
 
     const blueprint = ssp.EksBlueprint.builder()
       .account(account) // the supplied default will fail, but build and synth will pass
@@ -123,45 +113,13 @@ export default class PipelineConstruct {
         }),
         new ssp.CalicoAddOn(),
         new ssp.MetricsServerAddOn(),
-        //new ssp.ClusterAutoScalerAddOn(),
-        new ssp.addons.KarpenterAddOn({
-          //version: 'v0.7.0',
-          // ProvisionerSpecs: provisionerSpecs,
-        }),
         new ssp.ContainerInsightsAddOn(),
         new ssp.XrayAddOn(),
         new ssp.SecretsStoreAddOn(),
         new KubeOpsViewAddOn(),
       );
 
-    const bootstrapRepo: ApplicationRepository = {
-      repoUrl: gitUrl,
-      targetRevision: 'main',
-      credentialsSecretName: 'github-ssp',
-      credentialsType: 'TOKEN',
-    };
-    const devbootstrapRepo: ApplicationRepository = {
-      ...bootstrapRepo,
-      path: 'envs/dev',
-    };
-    const testbootstrapRepo: ApplicationRepository = {
-      ...bootstrapRepo,
-      path: 'envs/test',
-    };
-    const prodbootstrapRepo: ApplicationRepository = {
-      ...bootstrapRepo,
-      path: 'envs/prod',
-    };
-    const argoCDAddOnProps: ArgoCDAddOnProps = {
-      namespace: 'argocd',
-      adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
-    };
 
-    const nginxAddOnProps: NginxAddOnProps = {
-      internetFacing: true,
-      backendProtocol: 'tcp',
-      crossZoneEnabled: false,
-    };
 
     ssp.CodePipelineStack.builder()
       .name('ssp-eks-pipeline')
@@ -184,6 +142,7 @@ export default class PipelineConstruct {
               ...argoCDAddOnProps,
               ...{ bootstrapRepo: devbootstrapRepo },
             }),
+            new ssp.addons.KarpenterAddOn(),
             new ssp.NginxAddOn({
               ...nginxAddOnProps,
               externalDnsHostname: devSubdomain,

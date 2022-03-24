@@ -160,18 +160,7 @@ export default class PipelineConstruct {
     const nginxAddOnProps: NginxAddOnProps = {
       internetFacing: true,
       backendProtocol: 'tcp',
-      // externalDnsHostname: devSubdomain,
       crossZoneEnabled: false,
-      // certificateResourceName: GlobalResources.Certificate,
-      // values: {
-      //   controller: {
-      //     service: {
-      //       httpsPort: {
-      //         targetPort: 'http',
-      //       },
-      //     },
-      //   },
-      // },
     };
 
     ssp.CodePipelineStack.builder()
@@ -196,19 +185,7 @@ export default class PipelineConstruct {
               ...{ bootstrapRepo: devbootstrapRepo },
             }),
             new ssp.NginxAddOn({
-              // ...nginxAddOnProps,
-              internetFacing: true,
-              backendProtocol: 'tcp',
-              crossZoneEnabled: false,
-              values: {
-                controller: {
-                  service: {
-                    httpsPort: {
-                      targetPort: 'http',
-                    },
-                  },
-                },
-              },
+              ...nginxAddOnProps,
               externalDnsHostname: devSubdomain,
               certificateResourceName: GlobalResources.Certificate,
             }),
@@ -228,6 +205,7 @@ export default class PipelineConstruct {
               ...argoCDAddOnProps,
               ...{ bootstrapRepo: testbootstrapRepo },
             }),
+            new ssp.ClusterAutoScalerAddOn(),
             new ssp.NginxAddOn({
               ...nginxAddOnProps,
               externalDnsHostname: testSubdomain,
@@ -254,15 +232,6 @@ export default class PipelineConstruct {
             }),
             new ssp.NginxAddOn({
               ...nginxAddOnProps,
-              values: {
-                controller: {
-                  service: {
-                    httpsPort: {
-                      targetPort: 'http',
-                    },
-                  },
-                },
-              },
               externalDnsHostname: prodSubdomain,
               certificateResourceName: GlobalResources.Certificate,
             }),

@@ -1,26 +1,20 @@
-import { InstanceType } from '@aws-cdk/aws-ec2';
-import { CapacityType, KubernetesVersion } from '@aws-cdk/aws-eks';
+import {InstanceType} from '@aws-cdk/aws-ec2';
+import {CapacityType, KubernetesVersion} from '@aws-cdk/aws-eks';
 import * as cdk from '@aws-cdk/core';
-import { StackProps } from '@aws-cdk/core';
+import {StackProps} from '@aws-cdk/core';
 // SSP Lib
 import * as ssp from '@aws-quickstart/ssp-amazon-eks';
-import {
-  GlobalResources,
-  MngClusterProvider
-} from '@aws-quickstart/ssp-amazon-eks';
-import { valueFromContext } from '@aws-quickstart/ssp-amazon-eks/dist/utils/context-utils';
-import { getSecretValue } from '@aws-quickstart/ssp-amazon-eks/dist/utils/secrets-manager-utils';
-import { KubecostAddOn } from '@kubecost/kubecost-ssp-addon';
-import { KubeOpsViewAddOn } from '../apps/kube-ops-view';
+import {GlobalResources, MngClusterProvider} from '@aws-quickstart/ssp-amazon-eks';
+import {valueFromContext} from '@aws-quickstart/ssp-amazon-eks/dist/utils/context-utils';
+import {getSecretValue} from '@aws-quickstart/ssp-amazon-eks/dist/utils/secrets-manager-utils';
+import {KubecostAddOn} from '@kubecost/kubecost-ssp-addon';
+import {KubeOpsViewAddOn} from '../apps/kube-ops-view';
 import * as team from '../teams';
 import * as c from './const';
-import { argoCDAddOnProps, devbootstrapRepo, nginxAddOnProps, prodbootstrapRepo, testbootstrapRepo } from './const';
-
+import {argoCDAddOnProps, devbootstrapRepo, nginxAddOnProps, prodbootstrapRepo, testbootstrapRepo} from './const';
 
 const burnhamManifestDir = './lib/teams/team-burnham/';
 const rikerManifestDir = './lib/teams/team-riker/';
-
-
 
 export default class PipelineConstruct {
   async buildAsync(scope: cdk.Construct, id: string, props?: StackProps) {
@@ -78,7 +72,8 @@ export default class PipelineConstruct {
           maxSize: 20,
           minSize: 1,
           version: KubernetesVersion.V1_20,
-          nodeGroupCapacityType: CapacityType.SPOT,
+          //nodeGroupCapacityType: CapacityType.SPOT,
+          nodeGroupCapacityType: CapacityType.ON_DEMAND,
           instanceTypes: [
             //new InstanceType('m4.xlarge'),
             new InstanceType('m5.xlarge'),
@@ -119,8 +114,6 @@ export default class PipelineConstruct {
         new KubeOpsViewAddOn(),
       );
 
-
-
     ssp.CodePipelineStack.builder()
       .name('ssp-eks-pipeline')
       .owner('allamand')
@@ -140,7 +133,7 @@ export default class PipelineConstruct {
           .addOns(
             new ssp.ArgoCDAddOn({
               ...argoCDAddOnProps,
-              ...{ bootstrapRepo: devbootstrapRepo },
+              ...{bootstrapRepo: devbootstrapRepo},
             }),
             new ssp.addons.KarpenterAddOn(),
             new ssp.NginxAddOn({
@@ -162,7 +155,7 @@ export default class PipelineConstruct {
           .addOns(
             new ssp.ArgoCDAddOn({
               ...argoCDAddOnProps,
-              ...{ bootstrapRepo: testbootstrapRepo },
+              ...{bootstrapRepo: testbootstrapRepo},
             }),
             new ssp.ClusterAutoScalerAddOn(),
             new ssp.NginxAddOn({
@@ -187,7 +180,7 @@ export default class PipelineConstruct {
           .addOns(
             new ssp.ArgoCDAddOn({
               ...argoCDAddOnProps,
-              ...{ bootstrapRepo: prodbootstrapRepo },
+              ...{bootstrapRepo: prodbootstrapRepo},
             }),
             new ssp.NginxAddOn({
               ...nginxAddOnProps,

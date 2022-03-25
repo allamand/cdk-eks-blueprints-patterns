@@ -50,32 +50,18 @@ export default class PipelineConstruct {
     const parentDomain = valueFromContext(scope, 'parent.hostedzone.name', 'eks.demo3.allamand.com');
 
     const blueprint = ssp.EksBlueprint.builder()
-      .account(account) // the supplied default will fail, but build and synth will pass
+      .account(account) 
       .region('eu-west-1')
       .teams(...teams)
       .resourceProvider(GlobalResources.HostedZone, new ssp.LookupHostedZoneProvider(parentDomain))
       .clusterProvider(
-        //ATTENTION only the last clusterProvider is applied actually
-        new MngClusterProvider({
-          desiredSize: 1,
-          maxSize: 3,
-          minSize: 1,
-          version: KubernetesVersion.V1_20,
-          nodeGroupCapacityType: CapacityType.ON_DEMAND,
-          instanceTypes: [new InstanceType('m5.xlarge')],
-        }),
-      )
-      .clusterProvider(
-        //ATTENTION only the last clusterProvider is applied actually
         new MngClusterProvider({
           desiredSize: 3,
           maxSize: 20,
           minSize: 1,
           version: KubernetesVersion.V1_20,
           nodeGroupCapacityType: CapacityType.SPOT,
-          //nodeGroupCapacityType: CapacityType.ON_DEMAND,
           instanceTypes: [
-            //new InstanceType('m4.xlarge'),
             new InstanceType('m5.xlarge'),
             new InstanceType('m5a.xlarge'),
             new InstanceType('m5ad.xlarge'),
@@ -86,20 +72,12 @@ export default class PipelineConstruct {
           ],
         }),
       )
-      // .clusterProvider(
-      //   new ssp.FargateClusterProvider({
-      //     fargateProfiles,
-      //     version: KubernetesVersion.V1_20,
-      //   })
-      // )
       .addOns(
-        //new wego.WeaveGitOpsAddOn(bootstrapRepository, 'wego-system'),
         new ssp.AwsLoadBalancerControllerAddOn(),
         new ssp.AppMeshAddOn({
           enableTracing: true,
         }),
-        new ssp.SSMAgentAddOn(), // this is added to deal with PVRE as it is adding correct role to the node group, otherwise stack destroy won't work
-
+        new ssp.SSMAgentAddOn(), 
         new ssp.addons.ExternalDnsAddon({
           hostedZoneResources: [GlobalResources.HostedZone], // you can add more if you register resource providers
         }),

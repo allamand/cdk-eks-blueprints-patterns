@@ -59,7 +59,7 @@ export default class PipelineConstruct {
           id: 'updated-node-group-1',
           desiredSize: 3,
           maxSize: 20,
-          minSize: 1,
+          minSize: 3,
           version: KubernetesVersion.V1_20,
           nodeGroupCapacityType: CapacityType.ON_DEMAND,
           instanceTypes: [

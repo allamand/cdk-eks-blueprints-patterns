@@ -1,4 +1,4 @@
-import { ApplicationRepository, ArgoCDAddOnProps, NginxAddOnProps } from '@aws-quickstart/ssp-amazon-eks';
+import {ApplicationRepository, ArgoCDAddOnProps, NginxAddOnProps} from '@aws-quickstart/ssp-amazon-eks';
 
 export const KUBECOST_TOKEN = 'c2FsbGFtYW5AYW1hem9uLmZyxm343yadf98';
 
@@ -26,6 +26,11 @@ export const prodbootstrapRepo: ApplicationRepository = {
 export const argoCDAddOnProps: ArgoCDAddOnProps = {
   namespace: 'argocd',
   adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
+  values: {
+    server: {
+      extraArgs: ['--insecure'],
+    },
+  },
 };
 
 export const nginxAddOnProps: NginxAddOnProps = {

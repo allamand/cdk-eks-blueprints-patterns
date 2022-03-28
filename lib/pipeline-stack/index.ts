@@ -160,6 +160,7 @@ export default class PipelineConstruct {
               ...argoCDAddOnProps,
               ...{bootstrapRepo: prodbootstrapRepo},
             }),
+            new ssp.addons.KarpenterAddOn(),
             new ssp.NginxAddOn({
               ...nginxAddOnProps,
               externalDnsHostname: prodSubdomain,

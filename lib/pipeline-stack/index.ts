@@ -50,17 +50,18 @@ export default class PipelineConstruct {
     const parentDomain = valueFromContext(scope, 'parent.hostedzone.name', 'eks.demo3.allamand.com');
 
     const blueprint = ssp.EksBlueprint.builder()
-      .account(account) 
+      .account(account)
       .region('eu-west-1')
       .teams(...teams)
       .resourceProvider(GlobalResources.HostedZone, new ssp.LookupHostedZoneProvider(parentDomain))
       .clusterProvider(
         new MngClusterProvider({
+          id: 'updated-node-group-1',
           desiredSize: 3,
           maxSize: 20,
           minSize: 1,
           version: KubernetesVersion.V1_20,
-          nodeGroupCapacityType: CapacityType.SPOT,
+          nodeGroupCapacityType: CapacityType.ON_DEMAND,
           instanceTypes: [
             new InstanceType('m5.xlarge'),
             new InstanceType('m5a.xlarge'),
@@ -77,7 +78,7 @@ export default class PipelineConstruct {
         new ssp.AppMeshAddOn({
           enableTracing: true,
         }),
-        new ssp.SSMAgentAddOn(), 
+        new ssp.SSMAgentAddOn(),
         new ssp.addons.ExternalDnsAddon({
           hostedZoneResources: [GlobalResources.HostedZone], // you can add more if you register resource providers
         }),

@@ -4,7 +4,7 @@ import * as cdk from '@aws-cdk/core';
 import {StackProps} from '@aws-cdk/core';
 // SSP Lib
 import * as ssp from '@aws-quickstart/ssp-amazon-eks';
-import {GlobalResources, MngClusterProvider} from '@aws-quickstart/ssp-amazon-eks';
+import {AwsNodeTerminationHandlerAddOn, GlobalResources, MngClusterProvider} from '@aws-quickstart/ssp-amazon-eks';
 import {valueFromContext} from '@aws-quickstart/ssp-amazon-eks/dist/utils/context-utils';
 import {getSecretValue} from '@aws-quickstart/ssp-amazon-eks/dist/utils/secrets-manager-utils';
 import {KubecostAddOn} from '@kubecost/kubecost-ssp-addon';
@@ -56,12 +56,12 @@ export default class PipelineConstruct {
       .resourceProvider(GlobalResources.HostedZone, new ssp.LookupHostedZoneProvider(parentDomain))
       .clusterProvider(
         new MngClusterProvider({
-          id: 'updated-node-group-1',
+          id: 'updated-node-group-Spot',
           desiredSize: 3,
           maxSize: 20,
           minSize: 3,
           version: KubernetesVersion.V1_20,
-          nodeGroupCapacityType: CapacityType.ON_DEMAND,
+          nodeGroupCapacityType: CapacityType.SPOT,
           instanceTypes: [
             new InstanceType('m5.xlarge'),
             new InstanceType('m5a.xlarge'),
@@ -91,6 +91,7 @@ export default class PipelineConstruct {
         new ssp.XrayAddOn(),
         new ssp.SecretsStoreAddOn(),
         new KubeOpsViewAddOn(),
+        new AwsNodeTerminationHandlerAddOn(),
       );
 
     ssp.CodePipelineStack.builder()

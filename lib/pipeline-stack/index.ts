@@ -91,7 +91,6 @@ export default class PipelineConstruct {
         new ssp.XrayAddOn(),
         new ssp.SecretsStoreAddOn(),
         new KubeOpsViewAddOn(),
-        new AwsNodeTerminationHandlerAddOn(),
       );
 
     ssp.CodePipelineStack.builder()

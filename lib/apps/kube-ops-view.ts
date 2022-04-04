@@ -15,7 +15,12 @@ export const defaultProps: ssp.addons.HelmAddOnProps = {
   release: 'ssp-addon-kube-ops-view',
   version: '1.2.4',
   repository: 'https://charts.helm.sh/stable',
-  values: {},
+  values: {
+    image: {
+      reposirory: 'public.ecr.aws/seb-demo/kube-ops-view',
+      tag: '20.4.0-color'
+    }
+  },
 };
 
 export class KubeOpsViewAddOn extends ssp.addons.HelmAddOn {

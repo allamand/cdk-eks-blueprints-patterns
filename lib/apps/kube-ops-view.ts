@@ -1,6 +1,6 @@
-import { ManagedPolicy } from '@aws-cdk/aws-iam';
-import { Construct } from '@aws-cdk/core';
-import { ServiceAccount } from '@aws-cdk/aws-eks';
+import {ManagedPolicy} from '@aws-cdk/aws-iam';
+import {Construct} from '@aws-cdk/core';
+import {ServiceAccount} from '@aws-cdk/aws-eks';
 import * as ssp from '@aws-quickstart/ssp-amazon-eks';
 
 // helm repo add stable https://charts.helm.sh/stable
@@ -15,17 +15,12 @@ export const defaultProps: ssp.addons.HelmAddOnProps = {
   release: 'ssp-addon-kube-ops-view',
   version: '1.2.4',
   repository: 'https://charts.helm.sh/stable',
-  values: {
-    image: {
-      reposirory: 'public.ecr.aws/seb-demo/kube-ops-view',
-      tag: '20.4.0-color'
-    }
-  },
+  values: {},
 };
 
 export class KubeOpsViewAddOn extends ssp.addons.HelmAddOn {
   constructor(props?: ssp.addons.HelmAddOnProps) {
-    super({ ...defaultProps, ...props });
+    super({...defaultProps, ...props});
   }
 
   // Declares dependency on secret store add-on if secrets are needed.
@@ -54,7 +49,11 @@ export class KubeOpsViewAddOn extends ssp.addons.HelmAddOn {
         create: true,
       },
       service: {
-        type: 'LoadBalancer',
+        type: 'ClusterIP',
+      },
+      image: {
+        reposirory: 'public.ecr.aws/seb-demo/kube-ops-view',
+        tag: '20.4.0-color',
       },
       // serviceAccount: {
       //     create: false,

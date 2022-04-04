@@ -136,7 +136,7 @@ export default class PipelineConstruct {
               ...argoCDAddOnProps,
               ...{bootstrapRepo: testbootstrapRepo},
             }),
-            new ssp.ClusterAutoScalerAddOn(),
+            new ssp.ClusterAutoScalerAddOn({values: {extraArgs: {'scale-down-unneeded-time': '10s'}}}),
             new ssp.NginxAddOn({
               ...nginxAddOnProps,
               externalDnsHostname: testSubdomain,

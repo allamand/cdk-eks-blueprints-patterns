@@ -58,7 +58,7 @@ export default class PipelineConstruct {
         new MngClusterProvider({
           id: 'updated-node-group-Spot',
           desiredSize: 3,
-          maxSize: 20,
+          maxSize: 15,
           minSize: 3,
           version: KubernetesVersion.V1_20,
           nodeGroupCapacityType: CapacityType.SPOT,

@@ -1,6 +1,4 @@
-import {ManagedPolicy} from '@aws-cdk/aws-iam';
-import {Construct} from '@aws-cdk/core';
-import {ServiceAccount} from '@aws-cdk/aws-eks';
+import { Construct } from '@aws-cdk/core';
 import * as ssp from '@aws-quickstart/ssp-amazon-eks';
 
 export const defaultProps: ssp.addons.HelmAddOnProps = {
@@ -21,7 +19,7 @@ export class KyvernoAddOn extends ssp.addons.HelmAddOn {
   // Customers will have to explicitly add this add-on to the blueprint.
   //@ssp.utils.dependable(ssp.SecretsStoreAddOn.name)
   deploy(clusterInfo: ssp.ClusterInfo): Promise<Construct> {
-    const ns = ssp.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
+    //const ns = ssp.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
 
     const values: ssp.Values = {};
 

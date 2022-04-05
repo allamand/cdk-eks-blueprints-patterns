@@ -40,7 +40,7 @@ export const policiesProps: ssp.addons.HelmAddOnProps = {
 
 export class KyvernoPoliciesAddOn extends ssp.addons.HelmAddOn {
   constructor(props?: ssp.addons.HelmAddOnProps) {
-    super({...defaultProps, ...props});
+    super({...policiesProps, ...props});
   }
 
   // Declares dependency on secret store add-on if secrets are needed.

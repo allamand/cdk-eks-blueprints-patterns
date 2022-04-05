@@ -9,7 +9,7 @@ import {valueFromContext} from '@aws-quickstart/ssp-amazon-eks/dist/utils/contex
 import {getSecretValue} from '@aws-quickstart/ssp-amazon-eks/dist/utils/secrets-manager-utils';
 import {KubecostAddOn} from '@kubecost/kubecost-ssp-addon';
 import {KubeOpsViewAddOn} from '../apps/kube-ops-view';
-import { KyvernoAddOn } from '../apps/kyverno';
+import { KyvernoAddOn, KyvernoPoliciesAddOn } from '../apps/kyverno';
 import * as team from '../teams';
 import * as c from './const';
 import {argoCDAddOnProps, devbootstrapRepo, nginxAddOnProps, prodbootstrapRepo, testbootstrapRepo} from './const';
@@ -92,7 +92,8 @@ export default class PipelineConstruct {
         new ssp.XrayAddOn(),
         new ssp.SecretsStoreAddOn(),
         new KubeOpsViewAddOn(),
-        new KyvernoAddOn()
+        new KyvernoAddOn(),
+        new KyvernoPoliciesAddOn(),
       );
 
     ssp.CodePipelineStack.builder()

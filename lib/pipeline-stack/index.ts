@@ -9,6 +9,7 @@ import {valueFromContext} from '@aws-quickstart/ssp-amazon-eks/dist/utils/contex
 import {getSecretValue} from '@aws-quickstart/ssp-amazon-eks/dist/utils/secrets-manager-utils';
 import {KubecostAddOn} from '@kubecost/kubecost-ssp-addon';
 import {KubeOpsViewAddOn} from '../apps/kube-ops-view';
+import { KyvernoAddOn } from '../apps/kyverno';
 import * as team from '../teams';
 import * as c from './const';
 import {argoCDAddOnProps, devbootstrapRepo, nginxAddOnProps, prodbootstrapRepo, testbootstrapRepo} from './const';
@@ -91,6 +92,7 @@ export default class PipelineConstruct {
         new ssp.XrayAddOn(),
         new ssp.SecretsStoreAddOn(),
         new KubeOpsViewAddOn(),
+        new KyvernoAddOn()
       );
 
     ssp.CodePipelineStack.builder()
@@ -136,6 +138,7 @@ export default class PipelineConstruct {
               ...argoCDAddOnProps,
               ...{bootstrapRepo: testbootstrapRepo},
             }),
+            //ERROR Values are not supported by the add-on
             new ssp.ClusterAutoScalerAddOn({values: {extraArgs: {'scale-down-unneeded-time': '10s'}}}),
             new ssp.NginxAddOn({
               ...nginxAddOnProps,

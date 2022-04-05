@@ -19,7 +19,7 @@ export class KyvernoAddOn extends ssp.addons.HelmAddOn {
   // Customers will have to explicitly add this add-on to the blueprint.
   //@ssp.utils.dependable(ssp.SecretsStoreAddOn.name)
   deploy(clusterInfo: ssp.ClusterInfo): Promise<Construct> {
-    //const ns = ssp.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
+    const ns = ssp.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
 
     const values: ssp.Values = {};
 
@@ -47,7 +47,7 @@ export class KyvernoPoliciesAddOn extends ssp.addons.HelmAddOn {
   // Customers will have to explicitly add this add-on to the blueprint.
   //@ssp.utils.dependable(ssp.SecretsStoreAddOn.name)
   deploy(clusterInfo: ssp.ClusterInfo): Promise<Construct> {
-    const ns = ssp.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
+    //const ns = ssp.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
 
     const values: ssp.Values = {};
 

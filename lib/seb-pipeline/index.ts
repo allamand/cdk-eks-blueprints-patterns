@@ -103,9 +103,9 @@ export default class PipelineConstruct {
       .name('blueprints-eks-pipeline')
       .owner('allamand')
       .repository({
-        repoUrl: 'blueprints-eks-patterns',
+        repoUrl: 'cdk-eks-blueprints-patterns',
         credentialsSecretName: 'github-token',
-        targetRevision: 'main',
+        targetRevision: 'seb',
       })
       .stage({
         id: 'blueprints-dev',

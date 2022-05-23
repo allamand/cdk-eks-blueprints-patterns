@@ -34,11 +34,11 @@
     "@kubecost/kubecost-eks-blueprints-addon": "^0.1.2",
     "@newrelic/newrelic-eks-blueprints-addon": "^1.0.2",
     "@snyk-partners/snyk-monitor-eks-blueprints-addon": "^1.1.0",
-    "aws-cdk": "2.20.0",
+    "aws-cdk": "2.25.0",
     "source-map-support": "^0.5.21"
   },
   "overrides": {
-    "aws-cdk": "2.20.0",
+    "aws-cdk": "2.25.0",
     "@aws-quickstart/eks-blueprints": "1.0.0"
   }
 }

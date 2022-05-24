@@ -94,9 +94,9 @@ export default class PipelineConstruct {
         new blueprints.ContainerInsightsAddOn(),
         new blueprints.XrayAddOn(),
         new blueprints.SecretsStoreAddOn(),
-        new KubeOpsViewAddOn(),
-        new KyvernoAddOn(),
-        new KyvernoPoliciesAddOn(),
+        // new KubeOpsViewAddOn(),
+        // new KyvernoAddOn(),
+        // new KyvernoPoliciesAddOn(),
       );
 
     blueprints.CodePipelineStack.builder()

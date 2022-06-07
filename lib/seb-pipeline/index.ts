@@ -191,6 +191,7 @@ export default class PipelineConstruct {
           pre: [new blueprints.pipelines.cdkpipelines.ManualApprovalStep('manual-approval')],
         },
       })
+      //.build(scope, 'ssp-pipeline-stack', props);
       .build(scope, 'blueprints-pipeline-stack', props);
   }
 

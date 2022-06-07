@@ -124,7 +124,7 @@ export default class PipelineConstruct {
               ...argoCDAddOnProps,
               ...{ bootstrapRepo: devbootstrapRepo },
             }),
-            new blueprints.addons.KarpenterAddOn(),
+            new blueprints.addons.KarpenterAddOn(c.karpenterAddonProp),
             new blueprints.NginxAddOn({
               ...nginxAddOnProps,
               externalDnsHostname: devSubdomain,

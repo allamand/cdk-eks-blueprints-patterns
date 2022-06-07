@@ -1,4 +1,4 @@
-import {ApplicationRepository, ArgoCDAddOnProps, NginxAddOnProps} from '@aws-quickstart/eks-blueprints';
+import { ApplicationRepository, ArgoCDAddOnProps, NginxAddOnProps } from '@aws-quickstart/eks-blueprints';
 
 export const KUBECOST_TOKEN = 'c2FsbGFtYW5AYW1hem9uLmZyxm343yadf98';
 
@@ -37,4 +37,19 @@ export const nginxAddOnProps: NginxAddOnProps = {
   internetFacing: true,
   backendProtocol: 'tcp',
   crossZoneEnabled: false,
+};
+
+export const karpenterAddonProp = {
+  // provisionerSpecs: {
+  //   'node.kubernetes.io/instance-type': ['m5.2xlarge'],
+  //   'topology.kubernetes.io/zone': ['us-east-1c'],
+  //   'kubernetes.io/arch': ['amd64','arm64'],
+  //   'karpenter.sh/capacity-type': ['spot','on-demand'],
+  // },
+  subnetTags: {
+    'kubernetes.io/cluster/blueprints-dev-blueprint': '1',
+  },
+  securityGroupTags: {
+    'kubernetes.io/cluster/blueprints-dev-blueprint': 'owned',
+  },
 };

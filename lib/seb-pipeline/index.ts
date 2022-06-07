@@ -1,16 +1,16 @@
 import * as blueprints from '@aws-quickstart/eks-blueprints';
-import { utils } from '@aws-quickstart/eks-blueprints';
-import { KubecostAddOn } from '@kubecost/kubecost-eks-blueprints-addon';
-import { StackProps } from 'aws-cdk-lib';
+import {utils} from '@aws-quickstart/eks-blueprints';
+import {KubecostAddOn} from '@kubecost/kubecost-eks-blueprints-addon';
+import {StackProps} from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as eks from 'aws-cdk-lib/aws-eks';
-import { Construct } from 'constructs';
-import { KubeOpsViewAddOn } from '../apps/kube-ops-view';
-import { KyvernoAddOn, KyvernoPoliciesAddOn } from '../apps/kyverno';
+import {Construct} from 'constructs';
+import {KubeOpsViewAddOn} from '../apps/kube-ops-view';
+import {KyvernoAddOn, KyvernoPoliciesAddOn} from '../apps/kyverno';
 // Team implementations
 import * as team from '../teams';
 import * as c from './const';
-import { argoCDAddOnProps, devbootstrapRepo, nginxAddOnProps, prodbootstrapRepo, testbootstrapRepo } from './const';
+import {argoCDAddOnProps, devbootstrapRepo, nginxAddOnProps, prodbootstrapRepo, testbootstrapRepo} from './const';
 
 const burnhamManifestDir = './lib/teams/team-burnham/';
 const rikerManifestDir = './lib/teams/team-riker/';
@@ -95,8 +95,8 @@ export default class PipelineConstruct {
         new blueprints.XrayAddOn(),
         new blueprints.SecretsStoreAddOn(),
         new KubeOpsViewAddOn(),
-        // new KyvernoAddOn(),
-        // new KyvernoPoliciesAddOn(),
+        new KyvernoAddOn(),
+        new KyvernoPoliciesAddOn(),
       );
 
     blueprints.CodePipelineStack.builder()
@@ -122,7 +122,7 @@ export default class PipelineConstruct {
           .addOns(
             new blueprints.ArgoCDAddOn({
               ...argoCDAddOnProps,
-              ...{ bootstrapRepo: devbootstrapRepo },
+              ...{bootstrapRepo: devbootstrapRepo},
             }),
             new blueprints.addons.KarpenterAddOn(c.karpenterAddonProp),
             new blueprints.NginxAddOn({
@@ -148,10 +148,10 @@ export default class PipelineConstruct {
           .addOns(
             new blueprints.ArgoCDAddOn({
               ...argoCDAddOnProps,
-              ...{ bootstrapRepo: testbootstrapRepo },
+              ...{bootstrapRepo: testbootstrapRepo},
             }),
             //ERROR Values are not supported by the add-on
-            new blueprints.ClusterAutoScalerAddOn({ values: { extraArgs: { 'scale-down-unneeded-time': '10s' } } }),
+            new blueprints.ClusterAutoScalerAddOn({values: {extraArgs: {'scale-down-unneeded-time': '10s'}}}),
             new blueprints.NginxAddOn({
               ...nginxAddOnProps,
               externalDnsHostname: testSubdomain,
@@ -178,7 +178,7 @@ export default class PipelineConstruct {
           .addOns(
             new blueprints.ArgoCDAddOn({
               ...argoCDAddOnProps,
-              ...{ bootstrapRepo: prodbootstrapRepo },
+              ...{bootstrapRepo: prodbootstrapRepo},
             }),
             new blueprints.addons.KarpenterAddOn(),
             new blueprints.NginxAddOn({

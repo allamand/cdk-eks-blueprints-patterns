@@ -1,28 +1,68 @@
-apiVersion: networking.k8s.io/v1
+##https://github.com/ahmetb/kubernetes-network-policy-recipes
 kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
 metadata:
-  name: restrict-ingress-egress-burnham
+  name: allow-all
   namespace: team-burnham
 spec:
   podSelector: {}
-  policyTypes:
-  - Ingress
-  - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: team-riker
-    ports:
-    - protocol: TCP
-      port: 80
+  - {}
   egress:
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          name: team-troi
-    ports:
-    - protocol: TCP
-      port: 53
-    - protocol: UDP
-      port: 53
+  - {}
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: restrict-ingress-egress-burnham
+#   namespace: team-burnham
+# spec:
+#   podSelector: {}
+#   policyTypes:
+#     - Ingress
+#     - Egress
+#   ingress:
+#     - from:
+#       - namespaceSelector: {}
+#         #     matchLabels:
+#         #       name: team-riker
+#         # - namespaceSelector:
+#         #     matchLabels:
+#         #       name: team-burnham
+#       # ports:
+#       #   - protocol: TCP
+#       #     port: 80
+#   egress:
+#     - to:
+#        # - podSelector: {}
+#         - namespaceSelector:
+#             matchLabels:
+#               name: team-burnham
+#       ports:
+#         - protocol: TCP
+#           port: 53
+#         - protocol: UDP
+#           port: 53
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-internal-ingress-egress-burnham
+#   namespace: team-burnham
+# spec:
+#   podSelector: {}
+#   policyTypes:
+#     - Ingress
+#     - Egress
+#   ingress:
+#     - from:
+#       - podSelector: {}
+#         - namespaceSelector:
+#             matchLabels:
+#               name: team-burnham
+#       #ports: {}              
+#   egress:
+#     - to:
+#         - namespaceSelector:
+#             matchLabels:
+#               name: team-burnham
+#       #ports: {}

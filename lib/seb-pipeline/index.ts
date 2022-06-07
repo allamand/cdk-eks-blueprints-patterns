@@ -85,9 +85,9 @@ export default class PipelineConstruct {
         new blueprints.ExternalDnsAddOn({
           hostedZoneResources: [blueprints.GlobalResources.HostedZone], // you can add more if you register resource providers
         }),
-        new KubecostAddOn({
-          kubecostToken: c.KUBECOST_TOKEN,
-        }),
+        // new KubecostAddOn({
+        //   kubecostToken: c.KUBECOST_TOKEN,
+        // }),
         //new blueprints.SecretsStoreAddOn({rotationPollInterval: '120s'}),
         new blueprints.CalicoAddOn(),
         new blueprints.MetricsServerAddOn(),

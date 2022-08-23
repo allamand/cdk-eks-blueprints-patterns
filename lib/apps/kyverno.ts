@@ -1,27 +1,27 @@
-import {Construct} from '@aws-cdk/core';
-import * as ssp from '@aws-quickstart/ssp-amazon-eks';
+// import * as blueprints from '@aws-quickstart/eks-blueprints';
+import {Construct} from 'constructs';
 
-export const defaultProps: ssp.addons.HelmAddOnProps = {
+export const defaultProps: blueprints.addons.HelmAddOnProps = {
   chart: 'kyverno',
   name: 'kyverno',
   namespace: 'kyverno',
-  release: 'ssp-addon-kyverno',
+  release: 'blueprints-addon-kyverno',
   version: '2.3.2',
   repository: 'https://kyverno.github.io/kyverno/',
 };
 
-export class KyvernoAddOn extends ssp.addons.HelmAddOn {
-  constructor(props?: ssp.addons.HelmAddOnProps) {
+export class KyvernoAddOn extends blueprints.addons.HelmAddOn {
+  constructor(props?: blueprints.addons.HelmAddOnProps) {
     super({...defaultProps, ...props});
   }
 
   // Declares dependency on secret store add-on if secrets are needed.
   // Customers will have to explicitly add this add-on to the blueprint.
-  //@ssp.utils.dependable(ssp.SecretsStoreAddOn.name)
-  deploy(clusterInfo: ssp.ClusterInfo): Promise<Construct> {
-    const ns = ssp.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
+  //@blueprints.utils.dependable(blueprints.SecretsStoreAddOn.name)
+  deploy(clusterInfo: blueprints.ClusterInfo): Promise<Construct> {
+    const ns = blueprints.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
 
-    const values: ssp.Values = {};
+    const values: blueprints.Values = {};
 
     const chart = this.addHelmChart(clusterInfo, values);
 
@@ -29,27 +29,27 @@ export class KyvernoAddOn extends ssp.addons.HelmAddOn {
   }
 }
 
-export const policiesProps: ssp.addons.HelmAddOnProps = {
+export const policiesProps: blueprints.addons.HelmAddOnProps = {
   chart: 'kyverno-policies',
   name: 'kyverno-policies',
   namespace: 'kyverno',
-  release: 'ssp-addon-kyverno-policies',
+  release: 'blueprints-addon-kyverno-policies',
   version: '2.3.2',
   repository: 'https://kyverno.github.io/kyverno/',
 };
 
-export class KyvernoPoliciesAddOn extends ssp.addons.HelmAddOn {
-  constructor(props?: ssp.addons.HelmAddOnProps) {
+export class KyvernoPoliciesAddOn extends blueprints.addons.HelmAddOn {
+  constructor(props?: blueprints.addons.HelmAddOnProps) {
     super({...policiesProps, ...props});
   }
 
   // Declares dependency on secret store add-on if secrets are needed.
   // Customers will have to explicitly add this add-on to the blueprint.
-  //@ssp.utils.dependable(ssp.SecretsStoreAddOn.name)
-  deploy(clusterInfo: ssp.ClusterInfo): Promise<Construct> {
-    // const ns = ssp.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
+  //@blueprints.utils.dependable(blueprints.SecretsStoreAddOn.name)
+  deploy(clusterInfo: blueprints.ClusterInfo): Promise<Construct> {
+    // const ns = blueprints.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
 
-    const values: ssp.Values = {};
+    const values: blueprints.Values = {};
 
     const chart = this.addHelmChart(clusterInfo, values);
 

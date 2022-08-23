@@ -1,29 +1,27 @@
-import {ManagedPolicy} from '@aws-cdk/aws-iam';
-import {Construct} from '@aws-cdk/core';
-import {ServiceAccount} from '@aws-cdk/aws-eks';
-import * as ssp from '@aws-quickstart/ssp-amazon-eks';
+import * as blueprints from '@aws-quickstart/eks-blueprints';
+import {Construct} from 'constructs';
 
-export const defaultProps: ssp.addons.HelmAddOnProps = {
+export const defaultProps: blueprints.addons.HelmAddOnProps = {
   chart: 'kube-ops-view',
   name: 'kube-ops-view',
   namespace: 'kube-ops-view',
-  release: 'ssp-addon-kube-ops-view',
+  release: 'blueprints-addon-kube-ops-view',
   version: '1.2.4',
   repository: 'https://charts.helm.sh/stable',
 };
 
-export class KubeOpsViewAddOn extends ssp.addons.HelmAddOn {
-  constructor(props?: ssp.addons.HelmAddOnProps) {
+export class KubeOpsViewAddOn extends blueprints.addons.HelmAddOn {
+  constructor(props?: blueprints.addons.HelmAddOnProps) {
     super({...defaultProps, ...props});
   }
 
   // Declares dependency on secret store add-on if secrets are needed.
   // Customers will have to explicitly add this add-on to the blueprint.
-  @ssp.utils.dependable(ssp.SecretsStoreAddOn.name)
-  deploy(clusterInfo: ssp.ClusterInfo): Promise<Construct> {
-    const ns = ssp.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
+  @blueprints.utils.dependable(blueprints.SecretsStoreAddOn.name)
+  deploy(clusterInfo: blueprints.ClusterInfo): Promise<Construct> {
+    const ns = blueprints.utils.createNamespace(this.props.namespace!, clusterInfo.cluster, true);
 
-    const values: ssp.Values = {
+    const values: blueprints.Values = {
       rbac: {
         create: true,
       },
@@ -35,7 +33,6 @@ export class KubeOpsViewAddOn extends ssp.addons.HelmAddOn {
         tag: '20.4.0-color',
       },
     };
-
 
     const chart = this.addHelmChart(clusterInfo, values);
     return Promise.resolve(chart); // returning this promise will enable other add-ons to declare dependency on this addon.

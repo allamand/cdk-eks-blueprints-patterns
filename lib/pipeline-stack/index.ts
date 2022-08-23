@@ -1,30 +1,29 @@
-import {InstanceType} from '@aws-cdk/aws-ec2';
-import {CapacityType, KubernetesVersion} from '@aws-cdk/aws-eks';
-import * as cdk from '@aws-cdk/core';
-import {StackProps} from '@aws-cdk/core';
-// SSP Lib
-import * as ssp from '@aws-quickstart/ssp-amazon-eks';
-import {AwsNodeTerminationHandlerAddOn, GlobalResources, MngClusterProvider} from '@aws-quickstart/ssp-amazon-eks';
-import {valueFromContext} from '@aws-quickstart/ssp-amazon-eks/dist/utils/context-utils';
-import {getSecretValue} from '@aws-quickstart/ssp-amazon-eks/dist/utils/secrets-manager-utils';
-import {KubecostAddOn} from '@kubecost/kubecost-ssp-addon';
-import {KubeOpsViewAddOn} from '../apps/kube-ops-view';
+import * as blueprints from '@aws-quickstart/eks-blueprints';
+import { valueFromContext } from '@aws-quickstart/eks-blueprints/dist/utils';
+import { getSecretValue } from '@aws-quickstart/eks-blueprints/dist/utils/secrets-manager-utils';
+import { KubecostAddOn } from '@kubecost/kubecost-eks-blueprints-addon';
+import * as cdk from 'aws-cdk-lib';
+import { StackProps } from 'aws-cdk-lib';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as eks from 'aws-cdk-lib/aws-eks';
+import { Construct } from 'constructs';
+import { KubeOpsViewAddOn } from '../apps/kube-ops-view';
 import { KyvernoAddOn, KyvernoPoliciesAddOn } from '../apps/kyverno';
+// Team implementations
 import * as team from '../teams';
 import * as c from './const';
-import {argoCDAddOnProps, devbootstrapRepo, nginxAddOnProps, prodbootstrapRepo, testbootstrapRepo} from './const';
+import { argoCDAddOnProps, devbootstrapRepo, nginxAddOnProps, prodbootstrapRepo, testbootstrapRepo } from './const';
 
 const burnhamManifestDir = './lib/teams/team-burnham/';
 const rikerManifestDir = './lib/teams/team-riker/';
 
 export default class PipelineConstruct {
-  async buildAsync(scope: cdk.Construct, id: string, props?: StackProps) {
+  async buildAsync(scope: Construct, id: string, props?: StackProps) {
     try {
-      await getSecretValue('github-ssp', 'us-east-2');
-      await getSecretValue('github-ssp', 'eu-west-1');
-      await getSecretValue('github-ssp', 'eu-west-3');
+      await getSecretValue('github-blueprints', 'us-east-2');
+      await getSecretValue('github-blueprints', 'eu-west-1');
+      await getSecretValue('github-blueprints', 'eu-west-3');
 
-<<<<<<< HEAD
       await getSecretValue('argo-admin-secret', 'us-east-2');
       await getSecretValue('argo-admin-secret', 'eu-west-1');
       await getSecretValue('argo-admin-secret', 'eu-west-3');
@@ -39,7 +38,7 @@ export default class PipelineConstruct {
     const account = process.env.CDK_DEFAULT_ACCOUNT!;
 
     // Teams for the cluster.
-    const teams: Array<ssp.Team> = [
+    const teams: Array<blueprints.Team> = [
       new team.TeamPlatform(account),
       new team.TeamTroiSetup(),
       new team.TeamRikerSetup(scope, rikerManifestDir),
@@ -51,211 +50,179 @@ export default class PipelineConstruct {
     const prodSubdomain: string = valueFromContext(scope, 'prod.subzone.name', 'prod.eks.demo3.allamand.com');
     const parentDomain = valueFromContext(scope, 'parent.hostedzone.name', 'eks.demo3.allamand.com');
 
-    const blueprint = ssp.EksBlueprint.builder()
+    const clusterVersion = eks.KubernetesVersion.V1_21;
+
+    const blueMNG = new blueprints.MngClusterProvider({
+      id: 'primary-mng-blue',
+      version: clusterVersion,
+      minSize: 1,
+      maxSize: 100,
+      nodeGroupCapacityType: eks.CapacityType.SPOT,
+      instanceTypes: [
+        new ec2.InstanceType('m5.2xlarge'),
+        new ec2.InstanceType('m5a.2xlarge'),
+        new ec2.InstanceType('m5ad.2xlarge'),
+        new ec2.InstanceType('m5d.2xlarge'),
+      ],
+    });
+    const greenMNG = new blueprints.MngClusterProvider({
+      id: 'primary-mng-green',
+      version: clusterVersion,
+      minSize: 1,
+      maxSize: 100,
+      nodeGroupCapacityType: eks.CapacityType.SPOT,
+      instanceTypes: [
+        new ec2.InstanceType('m5.xlarge'),
+        new ec2.InstanceType('m5a.xlarge'),
+        new ec2.InstanceType('m5ad.xlarge'),
+        new ec2.InstanceType('m5d.xlarge'),
+      ],
+    });
+
+    const blueprint = blueprints.EksBlueprint.builder()
       .account(account)
       .region('eu-west-1')
       .teams(...teams)
-      .resourceProvider(GlobalResources.HostedZone, new ssp.LookupHostedZoneProvider(parentDomain))
+      .resourceProvider(blueprints.GlobalResources.HostedZone, new blueprints.LookupHostedZoneProvider(parentDomain))
       .clusterProvider(
-        new MngClusterProvider({
-          id: 'updated-node-group-Spot',
-          desiredSize: 3,
-          maxSize: 15,
-          minSize: 3,
-          version: KubernetesVersion.V1_20,
-          nodeGroupCapacityType: CapacityType.SPOT,
-          instanceTypes: [
-            new InstanceType('m5.xlarge'),
-            new InstanceType('m5a.xlarge'),
-            new InstanceType('m5ad.xlarge'),
-            new InstanceType('m5d.xlarge'),
-            new InstanceType('t2.xlarge'),
-            new InstanceType('t3.xlarge'),
-            new InstanceType('t3a.xlarge'),
-          ],
-        }),
+        // blueMNG,
+        greenMNG,
       )
       .addOns(
-        new ssp.AwsLoadBalancerControllerAddOn(),
-        new ssp.AppMeshAddOn({
+        new blueprints.AwsLoadBalancerControllerAddOn(),
+        new blueprints.AppMeshAddOn({
           enableTracing: true,
         }),
-        new ssp.SSMAgentAddOn(),
-        new ssp.addons.ExternalDnsAddon({
-          hostedZoneResources: [GlobalResources.HostedZone], // you can add more if you register resource providers
+        new blueprints.SSMAgentAddOn(),
+        new ExternalDnsAddon({
+          hostedZoneResources: [blueprints.GlobalResources.HostedZone], // you can add more if you register resource providers
         }),
         new KubecostAddOn({
           kubecostToken: c.KUBECOST_TOKEN,
         }),
-        new ssp.CalicoAddOn(),
-        new ssp.MetricsServerAddOn(),
-        new ssp.ContainerInsightsAddOn(),
-        new ssp.XrayAddOn(),
-        new ssp.SecretsStoreAddOn(),
+        new blueprints.CalicoAddOn(),
+        new blueprints.MetricsServerAddOn(),
+        new blueprints.ContainerInsightsAddOn(),
+        new blueprints.XrayAddOn(),
+        new blueprints.SecretsStoreAddOn(),
         new KubeOpsViewAddOn(),
         new KyvernoAddOn(),
         new KyvernoPoliciesAddOn(),
       );
 
-    ssp.CodePipelineStack.builder()
-      .name('ssp-eks-pipeline')
+    blueprints.CodePipelineStack.builder()
+      .name('blueprints-eks-pipeline')
       .owner('allamand')
       .repository({
-        repoUrl: 'ssp-eks-patterns',
+        repoUrl: 'blueprints-eks-patterns',
         credentialsSecretName: 'github-token',
         targetRevision: 'main',
       })
       .stage({
-        id: 'ssp-dev',
+        id: 'blueprints-dev',
         stackBuilder: blueprint
           .clone('eu-west-3')
           .resourceProvider(
-            GlobalResources.Certificate,
-            new ssp.CreateCertificateProvider('wildcard-cert', `*.${devSubdomain}`, GlobalResources.HostedZone),
+            blueprints.GlobalResources.Certificate,
+            new blueprints.CreateCertificateProvider(
+              'wildcard-cert',
+              `*.${devSubdomain}`,
+              blueprints.GlobalResources.HostedZone,
+            ),
           )
           .addOns(
-            new ssp.ArgoCDAddOn({
+            new blueprints.ArgoCDAddOn({
               ...argoCDAddOnProps,
-              ...{bootstrapRepo: devbootstrapRepo},
+              ...{ bootstrapRepo: devbootstrapRepo },
             }),
-            new ssp.addons.KarpenterAddOn(),
-            new ssp.NginxAddOn({
+            new blueprints.addons.KarpenterAddOn(),
+            new blueprints.NginxAddOn({
               ...nginxAddOnProps,
               externalDnsHostname: devSubdomain,
-              certificateResourceName: GlobalResources.Certificate,
+              certificateResourceName: blueprints.GlobalResources.Certificate,
             }),
           ),
       })
 
       .stage({
-        id: 'ssp-test',
+        id: 'blueprints-test',
         stackBuilder: blueprint
           .clone('us-east-2')
           .resourceProvider(
-            GlobalResources.Certificate,
-            new ssp.CreateCertificateProvider('wildcard-cert', `*.${testSubdomain}`, GlobalResources.HostedZone),
+            blueprints.GlobalResources.Certificate,
+            new blueprints.CreateCertificateProvider(
+              'wildcard-cert',
+              `*.${testSubdomain}`,
+              blueprints.GlobalResources.HostedZone,
+            ),
           )
           .addOns(
-            new ssp.ArgoCDAddOn({
+            new blueprints.ArgoCDAddOn({
               ...argoCDAddOnProps,
-              ...{bootstrapRepo: testbootstrapRepo},
+              ...{ bootstrapRepo: testbootstrapRepo },
             }),
             //ERROR Values are not supported by the add-on
-            new ssp.ClusterAutoScalerAddOn({values: {extraArgs: {'scale-down-unneeded-time': '10s'}}}),
-            new ssp.NginxAddOn({
+            new blueprints.ClusterAutoScalerAddOn({ values: { extraArgs: { 'scale-down-unneeded-time': '10s' } } }),
+            new blueprints.NginxAddOn({
               ...nginxAddOnProps,
               externalDnsHostname: testSubdomain,
-              certificateResourceName: GlobalResources.Certificate,
+              certificateResourceName: blueprints.GlobalResources.Certificate,
             }),
           ),
         stageProps: {
-          pre: [new ssp.pipelines.cdkpipelines.ManualApprovalStep('manual-approval')],
+          pre: [new blueprints.pipelines.cdkpipelines.ManualApprovalStep('manual-approval')],
         },
       })
 
       .stage({
-        id: 'ssp-prod',
+        id: 'blueprints-prod',
         stackBuilder: blueprint
           .clone('eu-west-1')
           .resourceProvider(
-            GlobalResources.Certificate,
-            new ssp.CreateCertificateProvider('wildcard-cert', `*.${prodSubdomain}`, GlobalResources.HostedZone),
+            blueprints.GlobalResources.Certificate,
+            new blueprints.CreateCertificateProvider(
+              'wildcard-cert',
+              `*.${prodSubdomain}`,
+              blueprints.GlobalResources.HostedZone,
+            ),
           )
           .addOns(
-            new ssp.ArgoCDAddOn({
+            new blueprints.ArgoCDAddOn({
               ...argoCDAddOnProps,
-              ...{bootstrapRepo: prodbootstrapRepo},
+              ...{ bootstrapRepo: prodbootstrapRepo },
             }),
-            new ssp.addons.KarpenterAddOn(),
-            new ssp.NginxAddOn({
+            new blueprints.addons.KarpenterAddOn(),
+            new blueprints.NginxAddOn({
               ...nginxAddOnProps,
               externalDnsHostname: prodSubdomain,
-              certificateResourceName: GlobalResources.Certificate,
+              certificateResourceName: blueprints.GlobalResources.Certificate,
             }),
           ),
         stageProps: {
-          pre: [new ssp.pipelines.cdkpipelines.ManualApprovalStep('manual-approval')],
+          pre: [new blueprints.pipelines.cdkpipelines.ManualApprovalStep('manual-approval')],
         },
       })
-      .build(scope, 'ssp-pipeline-stack', props);
+      .build(scope, 'blueprints-pipeline-stack', props);
   }
-}
-=======
-    async buildAsync(scope: Construct, props?: StackProps) {
-    
-        await this.prevalidateSecrets();
 
-        const account = process.env.CDK_DEFAULT_ACCOUNT!;
-        const blueprint = blueprints.EksBlueprint.builder()
-            .account(account) // the supplied default will fail, but build and synth will pass
-            .region('us-west-1')
-            .addOns(
-                new blueprints.AwsLoadBalancerControllerAddOn, 
-                new blueprints.NginxAddOn,
-                new blueprints.ArgoCDAddOn,
-                new blueprints.AppMeshAddOn( {
-                    enableTracing: true
-                }),
-                new blueprints.SSMAgentAddOn, // this is added to deal with PVRE as it is adding correct role to the node group, otherwise stack destroy won't work
-                new blueprints.CalicoAddOn,
-                new blueprints.MetricsServerAddOn,
-                new blueprints.ClusterAutoScalerAddOn,
-                new blueprints.ContainerInsightsAddOn,
-                new blueprints.XrayAddOn,
-                new blueprints.SecretsStoreAddOn)
-            .teams(
-                new team.TeamRikerSetup(scope, teamManifestDirList[1]),
-                new team.TeamBurnhamSetup(scope, teamManifestDirList[0])
-            );
+  async prevalidateSecrets() {
+    try {
+      //await blueprints.utils.validateSecret('github-token', 'us-east-2');
+      //await blueprints.utils.validateSecret('github-token', 'us-west-1');
 
-        blueprints.CodePipelineStack.builder()
-            .name("blueprints-eks-pipeline")
-            .owner("aws-samples")
-            .repository({
-                repoUrl: 'cdk-eks-blueprints-patterns',
-                credentialsSecretName: 'github-token',
-                targetRevision: 'main'
-            })
-            .stage({
-                id: 'us-west-1-sandbox',
-                stackBuilder: blueprint.clone('us-west-1')
-            })
-            .wave( {
-                id: "dev",
-                stages: [
-                    { id: "dev-west-1", stackBuilder: blueprint.clone('us-west-1')},
-                    { id: "dev-east-2", stackBuilder: blueprint.clone('us-east-2')},
-                ]
-            })
-            .stage({
-                id: 'us-east-2-uat',
-                stackBuilder: blueprint.clone('us-east-2'),
-                stageProps: {
-                    pre: [new blueprints.pipelines.cdkpipelines.ManualApprovalStep('manual-approval')]
-                }
-            })
-            .wave( {
-                id: "prod",
-                stages: [
-                    { id: "prod-west-1", stackBuilder: blueprint.clone('us-west-1')},
-                    { id: "prod-east-2", stackBuilder: blueprint.clone('us-east-2')},
-                ]
-            })
-            .build(scope, "pipeline", props);
-    }
+      await blueprints.utils.validateSecret('github-blueprints', 'us-east-2');
+      await blueprints.utils.validateSecret('github-blueprints', 'eu-west-1');
+      await blueprints.utils.validateSecret('github-blueprints', 'eu-west-3');
 
-    async prevalidateSecrets() {
-        try {
-            await blueprints.utils.validateSecret('github-token', 'us-east-2');
-            await blueprints.utils.validateSecret('github-token', 'us-west-1');
-        }
-        catch(error) {
-            throw new Error(`github-token secret must be setup in AWS Secrets Manager for the GitHub pipeline.
+      await blueprints.utils.validateSecret('argo-admin-secret', 'us-east-2');
+      await blueprints.utils.validateSecret('argo-admin-secret', 'eu-west-1');
+      await blueprints.utils.validateSecret('argo-admin-secret', 'eu-west-3');
+    } catch (error) {
+      throw new Error(`github-token secret must be setup in AWS Secrets Manager for the GitHub pipeline.
             The GitHub Personal Access Token should have these scopes:
             * **repo** - to read the repository
             * * **admin:repo_hook** - if you plan to use webhooks (true by default)
             * @see https://docs.aws.amazon.com/codepipeline/latest/userguide/GitHub-create-personal-token-CLI.html`);
-        }
     }
- }
->>>>>>> 2299c0d3615b1aad8faca5688535910a113b2f1f
+  }
+}

@@ -1,7 +1,7 @@
 import { Construct } from 'constructs';
 import { EksBlueprint } from '@aws-quickstart/eks-blueprints';
 import { KubecostAddOn } from '@kubecost/kubecost-eks-blueprints-addon';
-
+import * as c from './const';
 
 export default class KubecostConstruct {
     constructor(scope: Construct, id: string) {
@@ -13,7 +13,7 @@ export default class KubecostConstruct {
           .region(process.env.CDK_DEFAULT_REGION)
           .addOns(
             new KubecostAddOn({
-              kubecostToken: "c2FsbGFtYW5AYW1hem9uLmZyxm343yadf98",
+              kubecostToken: c.KUBECOST_TOKEN,
             }),
           )
           .build(scope, stackId);

@@ -30,45 +30,53 @@ export default class NginxIngressConstruct {
     //const parentDnsAccountId = this.node.tryGetContext("parent.dns.account")!;
     const parentDomain = valueFromContext(this, 'parent.hostedzone.name', 'eks.demo3.allamand.com');
 
-    blueprints.EksBlueprint.builder()
-      .account(process.env.CDK_DEFAULT_ACCOUNT)
-      .region(process.env.CDK_DEFAULT_REGION)
-      .teams(...teams)
-      .resourceProvider(GlobalResources.HostedZone, new blueprints.LookupHostedZoneProvider(parentDomain))
-      .resourceProvider(
-        GlobalResources.Certificate,
-        new blueprints.CreateCertificateProvider('wildcard-cert', `*.${subdomain}`, GlobalResources.HostedZone),
-      )
-      .addOns(
-        new blueprints.VpcCniAddOn(),
-        new blueprints.CoreDnsAddOn(),
-        new blueprints.CalicoAddOn(),
-        new blueprints.AwsLoadBalancerControllerAddOn(),
-        new blueprints.ExternalDnsAddOn({
-          hostedZoneResources: [blueprints.GlobalResources.HostedZone], // you can add more if you register resource providers
-        }),
-        new blueprints.NginxAddOn({
-          internetFacing: true,
-          backendProtocol: 'tcp',
-          externalDnsHostname: subdomain,
-          crossZoneEnabled: false,
-          certificateResourceName: GlobalResources.Certificate,
-        }),
-        new blueprints.SecretsStoreAddOn({rotationPollInterval: '120s'}),
-        new blueprints.ArgoCDAddOn({
-          bootstrapRepo: {
-            repoUrl: gitUrl,
-            targetRevision: 'main',
-            path: 'envs/qua1',
-          },
-          adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
-        }),
-        new blueprints.AppMeshAddOn(),
-        new blueprints.MetricsServerAddOn(),
-        new blueprints.ClusterAutoScalerAddOn(),
-        new blueprints.ContainerInsightsAddOn(),
-        new blueprints.XrayAddOn(),
-      )
-      .buildAsync(scope, `${id}-blueprint`);
-  }
+        blueprints.HelmAddOn.validateHelmVersions = true;
+
+        await blueprints.EksBlueprint.builder()
+            .account(process.env.CDK_DEFAULT_ACCOUNT)
+            .region(process.env.CDK_DEFAULT_REGION)
+            .teams(...teams)
+            .resourceProvider(GlobalResources.HostedZone, new DelegatingHostedZoneProvider({
+                parentDomain,
+                subdomain,
+                parentDnsAccountId,
+                delegatingRoleName: 'DomainOperatorRole',
+                wildcardSubdomain: true
+            }))
+            .resourceProvider(GlobalResources.Certificate, new blueprints.CreateCertificateProvider('wildcard-cert', `*.${subdomain}`, GlobalResources.HostedZone))
+            .addOns(
+                new blueprints.VpcCniAddOn(),
+                new blueprints.CoreDnsAddOn(),
+                new blueprints.CalicoOperatorAddOn,
+                new blueprints.CertManagerAddOn,
+                new blueprints.AdotCollectorAddOn,
+                new blueprints.AwsLoadBalancerControllerAddOn,
+                new blueprints.ExternalDnsAddOn({
+                    hostedZoneResources: [blueprints.GlobalResources.HostedZone] // you can add more if you register resource providers
+                }),
+                new blueprints.NginxAddOn({
+                    internetFacing: true,
+                    backendProtocol: "tcp",
+                    externalDnsHostname: subdomain,
+                    crossZoneEnabled: false,
+                    certificateResourceName: GlobalResources.Certificate
+                }),
+                new blueprints.SecretsStoreAddOn({ rotationPollInterval: "120s" }),
+                new blueprints.ArgoCDAddOn({
+                    bootstrapRepo: {
+                        repoUrl: gitUrl,
+                        targetRevision: "deployable",
+                        path: 'envs/dev'
+                    },
+                    adminPasswordSecretName: SECRET_ARGO_ADMIN_PWD,
+                }),
+                new blueprints.AppMeshAddOn,
+                new blueprints.MetricsServerAddOn,
+                new blueprints.ClusterAutoScalerAddOn,
+                new blueprints.CloudWatchAdotAddOn,
+                new blueprints.XrayAdotAddOn)
+            .buildAsync(scope, `${id}-blueprint`);
+
+            blueprints.HelmAddOn.validateHelmVersions = false;
+    }
 }

@@ -196,7 +196,7 @@ export default class PipelineConstruct {
         },
       })
       //.build(scope, 'ssp-pipeline-stack', props);
-      .build(scope, 'blueprints-pipeline-stack', props);
+      .build(scope, 'seb-pipeline', props);
   }
 
   async prevalidateSecrets() {

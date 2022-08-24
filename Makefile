@@ -48,7 +48,7 @@ init:
 	 npm run cdk bootstrap aws://$(ACCOUNT_ID) /us-east-2 --force
 
 pipeline:
-	npm run cdk deploy blueprints-pipeline-stack --require-approval=never
+	npm run cdk deploy seb-pipeline --require-approval=never
 
 multi-region:
 	npm run cdk deploy multi-region

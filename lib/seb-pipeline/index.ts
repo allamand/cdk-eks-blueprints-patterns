@@ -17,7 +17,7 @@ const rikerManifestDir = './lib/teams/team-riker/';
 
 export default class PipelineConstruct {
   async buildAsync(scope: Construct, props?: StackProps) {
-    // await _prevalidateSecrets();
+    await this.prevalidateSecrets();
 
     const account = process.env.CDK_DEFAULT_ACCOUNT!;
 
@@ -29,10 +29,10 @@ export default class PipelineConstruct {
       new team.TeamBurnhamSetup(scope, burnhamManifestDir),
     ];
 
-    const devSubdomain: string = utils.valueFromContext(scope, 'dev.subzone.name', 'dev.eks.demo3.allamand.com');
-    const testSubdomain: string = utils.valueFromContext(scope, 'test.subzone.name', 'test.eks.demo3.allamand.com');
-    const prodSubdomain: string = utils.valueFromContext(scope, 'prod.subzone.name', 'prod.eks.demo3.allamand.com');
-    const parentDomain = utils.valueFromContext(scope, 'parent.hostedzone.name', 'eks.demo3.allamand.com');
+    const devSubdomain: string = valueFromContext(scope, 'dev.subzone.name', 'dev.eks.demo3.allamand.com');
+    const testSubdomain: string = valueFromContext(scope, 'test.subzone.name', 'test.eks.demo3.allamand.com');
+    const prodSubdomain: string = valueFromContext(scope, 'prod.subzone.name', 'prod.eks.demo3.allamand.com');
+    const parentDomain = valueFromContext(scope, 'parent.hostedzone.name', 'eks.demo3.allamand.com');
 
     const clusterVersion = eks.KubernetesVersion.V1_21;
 
@@ -77,6 +77,10 @@ export default class PipelineConstruct {
       .addOns(
         new blueprints.VpcCniAddOn(),
         new blueprints.CoreDnsAddOn(),
+
+        new blueprints.CertManagerAddOn(),
+        new blueprints.AdotCollectorAddOn(),
+        new blueprints.CloudWatchAdotAddOn(),
         new blueprints.AwsLoadBalancerControllerAddOn(),
         new blueprints.AppMeshAddOn({
           enableTracing: true,
@@ -88,8 +92,7 @@ export default class PipelineConstruct {
         new KubecostAddOn({
           kubecostToken: c.KUBECOST_TOKEN,
         }),
-        //new blueprints.SecretsStoreAddOn({rotationPollInterval: '120s'}),
-        new blueprints.CalicoAddOn(),
+        new blueprints.CalicoOperatorAddOn(),
         new blueprints.MetricsServerAddOn(),
         new blueprints.ContainerInsightsAddOn(),
         new blueprints.XrayAddOn(),
@@ -197,18 +200,15 @@ export default class PipelineConstruct {
 
   async _prevalidateSecrets() {
     try {
-      //await blueprints.utils.validateSecret('github-token', 'us-east-2');
-      //await blueprints.utils.validateSecret('github-token', 'us-west-1');
-
-      await blueprints.utils.validateSecret('github-blueprints', 'us-east-2');
-      await blueprints.utils.validateSecret('github-blueprints', 'eu-west-1');
-      await blueprints.utils.validateSecret('github-blueprints', 'eu-west-3');
+      await blueprints.utils.validateSecret('github-token', 'us-east-2');
+      await blueprints.utils.validateSecret('github-token', 'eu-west-1');
+      await blueprints.utils.validateSecret('github-token', 'eu-west-3');
 
       await blueprints.utils.validateSecret('argo-admin-secret', 'us-east-2');
       await blueprints.utils.validateSecret('argo-admin-secret', 'eu-west-1');
       await blueprints.utils.validateSecret('argo-admin-secret', 'eu-west-3');
     } catch (error) {
-      throw new Error(`github-token secret must be setup in AWS Secrets Manager for the GitHub pipeline.
+      throw new Error(`github-token and argo-admin-secret secrets must be setup in AWS Secrets Manager for the GitHub pipeline.
             The GitHub Personal Access Token should have these scopes:
             * **repo** - to read the repository
             * * **admin:repo_hook** - if you plan to use webhooks (true by default)

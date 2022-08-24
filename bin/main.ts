@@ -21,14 +21,12 @@ new NginxIngressConstruct().buildAsync(app, 'nginx').catch(() => {
 import StarterConstruct from '../lib/starter-construct';
 new StarterConstruct().build(app, 'starter');
 
-
 //-------------------------------------------
 // Single Cluster with multiple teams.
 //-------------------------------------------
 
 import MultiTeamConstruct from '../lib/multi-team-construct';
 new MultiTeamConstruct(app, 'multi-team');
-
 
 //-------------------------------------------
 // Multiple clusters, multiple regions.
@@ -70,7 +68,6 @@ new PipelineMultiEnvGitops()
 import FargateConstruct from '../lib/fargate-construct';
 new FargateConstruct(app, 'fargate');
 
-
 //-------------------------------------------
 // Multiple clusters with deployment pipeline.
 //-------------------------------------------
@@ -86,14 +83,12 @@ else {
     logger.info("Valid AWS credentials are required to synthesize pipeline stack. Please run 'aws configure'");
 }
 
-
 //-------------------------------------------
 // Single cluster with Bottlerocket nodes.
 //-------------------------------------------
 
 import BottleRocketConstruct from '../lib/bottlerocket-construct';
 new BottleRocketConstruct().build(app, 'bottlerocket');
-
 
 //-------------------------------------------
 // Single cluster with custom configuration.

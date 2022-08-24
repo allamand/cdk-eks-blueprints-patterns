@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as eks from 'aws-cdk-lib/aws-eks';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 
-import { ClusterInfo, Team } from '@aws-quickstart/eks-blueprints';
+import {ClusterInfo, Team} from '@aws-quickstart/eks-blueprints';
 
 export class TeamTroiSetup implements Team {
   readonly name: string = 'team-troi';
@@ -15,17 +15,17 @@ export class TeamTroiSetup implements Team {
       kind: 'Namespace',
       metadata: {
         name: this.name,
-        annotations: { 'argocd.argoproj.io/sync-wave': '-1' },
+        annotations: {'argocd.argoproj.io/sync-wave': '-1'},
       },
     });
 
     this.setupNamespacePolicies(cluster);
 
-    const sa = cluster.addServiceAccount('inf-backend', { name: 'inf-backend', namespace: this.name });
+    const sa = cluster.addServiceAccount('inf-backend', {name: 'inf-backend', namespace: this.name});
     sa.node.addDependency(namespace);
     const bucket = new s3.Bucket(stack, 'inf-backend-bucket');
     bucket.grantReadWrite(sa);
-    new cdk.CfnOutput(stack, this.name + '-sa-iam-role', { value: sa.role.roleArn });
+    new cdk.CfnOutput(stack, this.name + '-sa-iam-role', {value: sa.role.roleArn});
   }
 
   setupNamespacePolicies(cluster: eks.Cluster) {
@@ -33,7 +33,7 @@ export class TeamTroiSetup implements Team {
     cluster.addManifest(quotaName, {
       apiVersion: 'v1',
       kind: 'ResourceQuota',
-      metadata: { name: quotaName, namespace: this.name },
+      metadata: {name: quotaName, namespace: this.name},
       spec: {
         hard: {
           'requests.cpu': '10',

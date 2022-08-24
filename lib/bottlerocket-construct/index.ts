@@ -41,5 +41,3 @@ export default class BottlerocketConstruct {
             .build(scope, stackID);
     }
 }
-
-

@@ -40,7 +40,7 @@ export default class NginxIngressConstruct {
       .resourceProvider(
         GlobalResources.HostedZone,
         //new blueprints.LookupHostedZoneProvider(parentDomain),
-        new DelegatingHostedZoneProvider({
+        new blueprints.DelegatingHostedZoneProvider({
           parentDomain,
           subdomain,
           parentDnsAccountId,

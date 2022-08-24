@@ -1,5 +1,6 @@
 import * as blueprints from '@aws-quickstart/eks-blueprints';
 import {utils} from '@aws-quickstart/eks-blueprints';
+import { valueFromContext } from '@aws-quickstart/eks-blueprints/dist/utils';
 import {KubecostAddOn} from '@kubecost/kubecost-eks-blueprints-addon';
 import {StackProps} from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
@@ -198,7 +199,7 @@ export default class PipelineConstruct {
       .build(scope, 'blueprints-pipeline-stack', props);
   }
 
-  async _prevalidateSecrets() {
+  async prevalidateSecrets() {
     try {
       await blueprints.utils.validateSecret('github-token', 'us-east-2');
       await blueprints.utils.validateSecret('github-token', 'eu-west-1');

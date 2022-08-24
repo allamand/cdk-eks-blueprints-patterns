@@ -13,29 +13,34 @@ export default class PipelineConstruct {
   async buildAsync(scope: Construct, props?: StackProps) {
     await this.prevalidateSecrets();
 
-    const account = process.env.CDK_DEFAULT_ACCOUNT!;
-    const blueprint = blueprints.EksBlueprint.builder()
-      .account(account) // the supplied default will fail, but build and synth will pass
-      .region('us-west-1')
-      .addOns(
-        new blueprints.AwsLoadBalancerControllerAddOn(),
-        new blueprints.NginxAddOn(),
-        new blueprints.ArgoCDAddOn(),
-        new blueprints.AppMeshAddOn({
-          enableTracing: true,
-        }),
-        new blueprints.SSMAgentAddOn(), // this is added to deal with PVRE as it is adding correct role to the node group, otherwise stack destroy won't work
-        new blueprints.CalicoAddOn(),
-        new blueprints.MetricsServerAddOn(),
-        new blueprints.ClusterAutoScalerAddOn(),
-        new blueprints.ContainerInsightsAddOn(),
-        new blueprints.XrayAddOn(),
-        new blueprints.SecretsStoreAddOn(),
-      )
-      .teams(
-        new team.TeamRikerSetup(scope, teamManifestDirList[1]),
-        new team.TeamBurnhamSetup(scope, teamManifestDirList[0]),
-      );
+    async buildAsync(scope: Construct, props?: StackProps) {
+    
+        await this.prevalidateSecrets();
+
+        const account = process.env.CDK_DEFAULT_ACCOUNT!;
+        const blueprint = blueprints.EksBlueprint.builder()
+            .account(account) // the supplied default will fail, but build and synth will pass
+            .region('us-west-1')
+            .addOns(
+                new blueprints.CertManagerAddOn,
+                new blueprints.AdotCollectorAddOn,
+                new blueprints.AwsLoadBalancerControllerAddOn, 
+                new blueprints.NginxAddOn,
+                new blueprints.ArgoCDAddOn,
+                new blueprints.AppMeshAddOn( {
+                    enableTracing: true
+                }),
+                new blueprints.SSMAgentAddOn, // this is added to deal with PVRE as it is adding correct role to the node group, otherwise stack destroy won't work
+                new blueprints.CalicoOperatorAddOn,
+                new blueprints.MetricsServerAddOn,
+                new blueprints.ClusterAutoScalerAddOn,
+                new blueprints.CloudWatchAdotAddOn,
+                new blueprints.XrayAddOn,
+                new blueprints.SecretsStoreAddOn)
+            .teams(
+                new team.TeamRikerSetup(scope, teamManifestDirList[1]),
+                new team.TeamBurnhamSetup(scope, teamManifestDirList[0])
+            );
 
     blueprints.CodePipelineStack.builder()
       .name('blueprints-eks-pipeline')

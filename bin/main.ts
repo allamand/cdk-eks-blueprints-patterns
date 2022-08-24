@@ -1,11 +1,18 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
+import { logger } from '@aws-quickstart/eks-blueprints/dist/utils';
 
 const app = new cdk.App();
 
+// CDK Default Environment - default account and region
+const account = process.env.CDK_DEFAULT_ACCOUNT!;
+const region = process.env.CDK_DEFAULT_REGION!;
+const env: cdk.Environment = { account: account, region: region };
+
+
 import NginxIngressConstruct from '../lib/nginx-ingress-construct';
 new NginxIngressConstruct().buildAsync(app, 'nginx').catch(() => {
-    console.log("NGINX Ingress pattern is not setup due to missing secrets for ArgoCD admin pwd.");
+    logger.info("NGINX Ingress pattern is not setup due to missing secrets for ArgoCD admin pwd.");
 });
 //-------------------------------------------
 // Starter Cluster with barebone infrastructure.
@@ -29,9 +36,32 @@ new MultiTeamConstruct(app, 'multi-team');
 
 import MultiRegionConstruct from '../lib/multi-region-construct';
 new MultiRegionConstruct().buildAsync(app, 'multi-region').catch((error) => {
-    console.log("Multi region pattern is not setup due to missing secrets: " + error);
+    logger.info("Multi region pattern is not setup due to missing secrets: ", error);
 });
 
+//--------------------------------------------------------------------------
+// Multiple clusters, multiple reginos ,multiple teams, GitOps bootstrapped.
+//--------------------------------------------------------------------------
+
+import PipelineMultiEnvGitops, { populateWithContextDefaults } from '../lib/pipeline-multi-env-gitops';
+
+// These different CDK environments are meant to be used for multi-region/account usage, 
+// where the pipeline, dev cluster, and prod cluster are deployed in seperate environments
+const { devEnv, pipelineEnv, prodEnv }:
+    { devEnv: cdk.Environment; pipelineEnv: cdk.Environment; prodEnv: cdk.Environment; } =
+    populateWithContextDefaults(app, account, region);
+
+new PipelineMultiEnvGitops()
+    .buildAsync(app, 'pipeline-multi-env',
+        {
+            devEnv: devEnv,
+            pipelineEnv: pipelineEnv,
+            prodEnv: prodEnv,
+        },
+        { env })
+    .catch(() => {
+        logger.info("Pipeline pattern is not setup due to missing secrets for GitHub access.");
+    });
 
 //-------------------------------------------
 // Single Fargate cluster.
@@ -46,17 +76,14 @@ new FargateConstruct(app, 'fargate');
 //-------------------------------------------
 //import PipelineConstruct from '../lib/pipeline-stack';
 import PipelineConstruct from '../lib/seb-pipeline';
-const account = process.env.CDK_DEFAULT_ACCOUNT;
-const region = process.env.CDK_DEFAULT_REGION;
-const env = { account, region };
 
-if(account) {
+if (account) {
     new PipelineConstruct().buildAsync(app, { env }).catch(() => {
-        console.log("Pipeline pattern is not setup due to missing secrets for GitHub access.");
+        logger.info("Pipeline pattern is not setup due to missing secrets for GitHub access.");
     });
 }
 else {
-    console.log("Valid AWS credentials are required to synthesize pipeline stack. Please run 'aws configure'");
+    logger.info("Valid AWS credentials are required to synthesize pipeline stack. Please run 'aws configure'");
 }
 
 
@@ -77,7 +104,7 @@ new GenericClusterConstruct().build(app, 'generic-cluster');
 
 import DynatraceOperatorConstruct from '../lib/dynatrace-construct';
 new DynatraceOperatorConstruct().buildAsync(app, "dynatrace-operator").catch(() => {
-    console.log("Dynatrace pattern is not setup due to missing secrets for dynatrace-tokens.");
+    logger.info("Dynatrace pattern is not setup due to missing secrets for dynatrace-tokens.");
 });
 
 import KubecostConstruct from '../lib/kubecost-construct';
@@ -92,7 +119,7 @@ new NewRelicConstruct(app, 'newrelic-cluster');
 import DatadogConstruct from '../lib/datadog-construct';
 
 new DatadogConstruct().buildAsync(app, 'datadog').catch((error) => {
-    console.log("Datadog pattern is not setup due to missing secrets: " + error);
+    logger.info("Datadog pattern is not setup due to missing secrets: " + error);
 });
 
 import KastenK10Construct from '../lib/kasten-k10-construct';
@@ -102,6 +129,7 @@ import SnykConstruct from '../lib/snyk-construct';
 new SnykConstruct(app, 'snyk-monitor');
 
 import RafayConstruct from '../lib/rafay-construct';
+
 new RafayConstruct().buildAsync(app, 'rafay-cluster').catch((error) => {
-    console.log("Rafay pattern is not setup due to missing secrets: " + error);
+    logger.info("Rafay pattern is not setup due to missing secrets: " + error);
 });

@@ -1,6 +1,6 @@
 import * as blueprints from '@aws-quickstart/eks-blueprints';
 import {utils} from '@aws-quickstart/eks-blueprints';
-import { valueFromContext } from '@aws-quickstart/eks-blueprints/dist/utils';
+import {valueFromContext} from '@aws-quickstart/eks-blueprints/dist/utils';
 import {KubecostAddOn} from '@kubecost/kubecost-eks-blueprints-addon';
 import {StackProps} from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
@@ -33,7 +33,7 @@ export default class PipelineConstruct {
     const devSubdomain: string = valueFromContext(scope, 'dev.subzone.name', 'dev.eks.demo3.allamand.com');
     const testSubdomain: string = valueFromContext(scope, 'test.subzone.name', 'test.eks.demo3.allamand.com');
     const prodSubdomain: string = valueFromContext(scope, 'prod.subzone.name', 'prod.eks.demo3.allamand.com');
-    const parentDomain = valueFromContext(scope, 'parent.hostedzone.name', 'eks.demo3.allamand.com');
+    const parentDomain: string = valueFromContext(scope, 'parent.hostedzone.name', 'eks.demo3.allamand.com');
 
     const clusterVersion = eks.KubernetesVersion.V1_21;
 
@@ -128,7 +128,7 @@ export default class PipelineConstruct {
               ...argoCDAddOnProps,
               ...{bootstrapRepo: devbootstrapRepo},
             }),
-            new blueprints.addons.KarpenterAddOn(c.karpenterAddonProp),
+            new blueprints.addons.KarpenterAddOn(c.devKarpenterAddonProp),
             new blueprints.NginxAddOn({
               ...nginxAddOnProps,
               externalDnsHostname: devSubdomain,

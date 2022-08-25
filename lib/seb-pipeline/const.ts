@@ -39,7 +39,7 @@ export const nginxAddOnProps: NginxAddOnProps = {
   crossZoneEnabled: false,
 };
 
-export const karpenterAddonProp = {
+export const devKarpenterAddonProp = {
   // provisionerSpecs: {
   //   'node.kubernetes.io/instance-type': ['m5.2xlarge'],
   //   'topology.kubernetes.io/zone': ['us-east-1c'],
@@ -48,8 +48,29 @@ export const karpenterAddonProp = {
   // },
   subnetTags: {
     'kubernetes.io/cluster/blueprints-dev-blueprint': '1',
+    'aws:cloudformation:stack-name': 'blueprints-dev-blueprints-dev-blueprint'
   },
   securityGroupTags: {
     'kubernetes.io/cluster/blueprints-dev-blueprint': 'owned',
+  },
+};
+
+export const testKarpenterAddonProp = {
+  subnetTags: {
+    'kubernetes.io/cluster/blueprints-dev-blueprint': '1',
+    'aws:cloudformation:stack-name': 'blueprints-test-blueprints-test-blueprint',
+  },
+  securityGroupTags: {
+    'kubernetes.io/cluster/blueprints-test-blueprint': 'owned',
+  },
+};
+
+export const prodKarpenterAddonProp = {
+  subnetTags: {
+    'kubernetes.io/cluster/blueprints-dev-blueprint': '1',
+    'aws:cloudformation:stack-name': 'blueprints-prod-blueprints-prod-blueprint',
+  },
+  securityGroupTags: {
+    'kubernetes.io/cluster/blueprints-prod-blueprint': 'owned',
   },
 };

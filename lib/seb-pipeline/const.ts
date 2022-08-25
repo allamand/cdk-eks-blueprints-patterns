@@ -51,7 +51,8 @@ export const devKarpenterAddonProp = {
     'aws:cloudformation:stack-name': 'blueprints-dev-blueprints-dev-blueprint'
   },
   securityGroupTags: {
-    'kubernetes.io/cluster/blueprints-dev-blueprint': 'owned',
+    //'kubernetes.io/cluster/blueprints-dev-blueprint': 'owned',
+    'aws:eks:cluster-name':	'blueprints-dev-blueprint'
   },
 };
 
@@ -61,7 +62,8 @@ export const testKarpenterAddonProp = {
     'aws:cloudformation:stack-name': 'blueprints-test-blueprints-test-blueprint',
   },
   securityGroupTags: {
-    'kubernetes.io/cluster/blueprints-test-blueprint': 'owned',
+    //'kubernetes.io/cluster/blueprints-test-blueprint': 'owned',
+    'aws:eks:cluster-name': 'blueprints-test-blueprint',
   },
 };
 
@@ -71,6 +73,7 @@ export const prodKarpenterAddonProp = {
     'aws:cloudformation:stack-name': 'blueprints-prod-blueprints-prod-blueprint',
   },
   securityGroupTags: {
-    'kubernetes.io/cluster/blueprints-prod-blueprint': 'owned',
+    //'kubernetes.io/cluster/blueprints-prod-blueprint': 'owned',
+    'aws:eks:cluster-name': 'blueprints-prod-blueprint',
   },
 };

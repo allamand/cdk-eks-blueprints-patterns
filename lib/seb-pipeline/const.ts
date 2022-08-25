@@ -47,7 +47,7 @@ export const devKarpenterAddonProp = {
   //   'karpenter.sh/capacity-type': ['spot','on-demand'],
   // },
   subnetTags: {
-    'kubernetes.io/cluster/blueprints-dev-blueprint': '1',
+    //'kubernetes.io/cluster/blueprints-dev-blueprint': '1',
     'aws:cloudformation:stack-name': 'blueprints-dev-blueprints-dev-blueprint'
   },
   securityGroupTags: {
@@ -57,7 +57,7 @@ export const devKarpenterAddonProp = {
 
 export const testKarpenterAddonProp = {
   subnetTags: {
-    'kubernetes.io/cluster/blueprints-dev-blueprint': '1',
+    //'kubernetes.io/cluster/blueprints-dev-blueprint': '1',
     'aws:cloudformation:stack-name': 'blueprints-test-blueprints-test-blueprint',
   },
   securityGroupTags: {
@@ -67,7 +67,7 @@ export const testKarpenterAddonProp = {
 
 export const prodKarpenterAddonProp = {
   subnetTags: {
-    'kubernetes.io/cluster/blueprints-dev-blueprint': '1',
+    //'kubernetes.io/cluster/blueprints-dev-blueprint': '1',
     'aws:cloudformation:stack-name': 'blueprints-prod-blueprints-prod-blueprint',
   },
   securityGroupTags: {

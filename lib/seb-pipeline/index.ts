@@ -40,7 +40,7 @@ export default class PipelineConstruct {
     const blueMNG = new blueprints.MngClusterProvider({
       id: 'primary-mng-blue',
       version: clusterVersion,
-      minSize: 3,
+      minSize: 1,
       maxSize: 100,
       nodeGroupCapacityType: eks.CapacityType.SPOT,
       instanceTypes: [
@@ -54,7 +54,7 @@ export default class PipelineConstruct {
     const greenMNG = new blueprints.MngClusterProvider({
       id: 'primary-mng-green',
       version: clusterVersion,
-      minSize: 3,
+      minSize: 1,
       maxSize: 100,
       nodeGroupCapacityType: eks.CapacityType.SPOT,
       instanceTypes: [
